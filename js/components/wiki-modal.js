@@ -100,8 +100,9 @@ class WikiModalManager {
         ${imageHtml}
         <p class="text-sm font-normal mb-4">${data.extract}</p>
       </div>
-      <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400">
-        💡 <strong>Not:</strong> Formülün detaylı matematiksel ispatları, tarihçesi ve türev bağıntıları için aşağıdaki butondan tam Vikipedi makalesini inceleyebilirsiniz.
+      <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5"></i>
+        <span><strong>Not:</strong> Formülün detaylı matematiksel ispatları, tarihçesi ve türev bağıntıları için aşağıdaki butondan tam Vikipedi makalesini inceleyebilirsiniz.</span>
       </div>
     `;
 

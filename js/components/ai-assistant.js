@@ -27,9 +27,14 @@ class AIAssistant {
 
   initEvents() {
     if (this.closeBtn && this.drawer) {
-      this.closeBtn.addEventListener('click', () => {
-        this.drawer.classList.add('hidden');
-        this.drawer.classList.remove('flex');
+      this.closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.appState && typeof window.appState.closeAiDrawer === 'function') {
+          window.appState.closeAiDrawer();
+        } else {
+          this.drawer.classList.add('hidden');
+          this.drawer.classList.remove('flex');
+        }
       });
     }
 
@@ -70,9 +75,10 @@ class AIAssistant {
               <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i> LazalBot Fizik Laboratuvarı Sezgi Motoru
             </p>
             <p class="text-xs text-slate-300">Sohbet sıfırlandı. Masadaki büyüklükleri veya formülleri birleştirerek yeni bağıntılar üretebilir veya doğrudan sorularını sorabilirsin.</p>
-            <p class="text-[11px] text-slate-400 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
-              💡 Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak <strong>LazalBot</strong>'un derin boyut analizini, evren analojilerini ve sınır durum yorumlarını canlı olarak alabilirsin.
-            </p>
+            <div class="text-[11px] text-slate-400 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800 flex items-start gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5"></i>
+              <span>Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak <strong>LazalBot</strong>'un derin boyut analizini, evren analojilerini ve sınır durum yorumlarını canlı olarak alabilirsin.</span>
+            </div>
           </div>
         `;
         if (window.lucide) lucide.createIcons({ root: this.feed });
@@ -108,7 +114,7 @@ class AIAssistant {
         this.apiKey = val || this.defaultApiKey;
         localStorage.setItem('physics_alchemy_gemini_key', this.apiKey);
         this.updateStatus();
-        this.appendCard('assistant', '✨ <strong>LazalBot Fizik Mentörü Hazır!</strong> Artık her türlü fizik teorisi, paradoks ve matematiksel bağıntıyı tartışabiliriz.');
+        this.appendCard('assistant', '<i data-lucide="sparkles" class="w-4 h-4 text-purple-400 inline mr-1"></i><strong>LazalBot Fizik Mentörü Hazır!</strong> Artık her türlü fizik teorisi, paradoks ve matematiksel bağıntıyı tartışabiliriz.');
         settingsModal.classList.add('opacity-0');
         setTimeout(() => settingsModal.classList.add('hidden'), 200);
       });
@@ -420,11 +426,12 @@ Görevin:
       <div class="font-bold text-white flex items-center gap-1.5">
         <i data-lucide="compass" class="w-4 h-4 text-rose-400"></i> Skaler ve Vektörel Ayrımı
       </div>
-      <p>🔵 <strong>Skaler Büyüklükler:</strong> Yalnızca sayısal değer ve birimle ifade edilir (Kütle $m$, Sıcaklık $T$, Enerji $W$, Zaman $t$). Yönleri yoktur.</p>
-      <p>🔴 <strong>Vektörel Büyüklükler:</strong> Sayı ve birimin yanında yön ve doğrultu içerir (Kuvvet $\\vec{F}$, Hız $\\vec{v}$, İvme $\\vec{a}$, Momentum $\\vec{p}$).</p>
-      <p class="text-[11px] text-slate-400 bg-slate-950 p-2 rounded border border-slate-800">
-        💡 <em>Fiziksel İlke: İki vektörün skaler (nokta) çarpımı skaler bir skaler nicelik (İş / Enerji: $W = \\vec{F} \\cdot \\vec{x}$), vektörel (çapraz) çarpımı ise yeni bir vektör (Tork: $\\vec{\\tau} = \\vec{r} \\times \\vec{F}$) doğurur!</em>
-      </p>
+      <p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0"></span><span><strong>Skaler Büyüklükler:</strong> Yalnızca sayısal değer ve birimle ifade edilir (Kütle $m$, Sıcaklık $T$, Enerji $W$, Zaman $t$). Yönleri yoktur.</span></p>
+      <p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span><span><strong>Vektörel Büyüklükler:</strong> Sayı ve birimin yanında yön ve doğrultu içerir (Kuvvet $\\vec{F}$, Hız $\\vec{v}$, İvme $\\vec{a}$, Momentum $\\vec{p}$).</span></p>
+      <div class="text-[11px] text-slate-400 bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-start gap-2">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+        <span><em>Fiziksel İlke: İki vektörün skaler (nokta) çarpımı skaler bir nicelik (İş / Enerji: $W = \\vec{F} \\cdot \\vec{x}$), vektörel (çapraz) çarpımı ise yeni bir vektör (Tork: $\\vec{\\tau} = \\vec{r} \\times \\vec{F}$) doğurur!</em></span>
+      </div>
     `);
   }
 

@@ -98,6 +98,7 @@ class InteractivePhysicsCanvas {
     // Global Pointer Movement for canvas node dragging
     window.addEventListener('pointermove', (e) => this.onPointerMove(e));
     window.addEventListener('pointerup', (e) => this.onPointerUp(e));
+    window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
 
     // Clear Canvas Button
     const clearBtn = document.getElementById('clearCanvasBtn');
@@ -168,8 +169,8 @@ class InteractivePhysicsCanvas {
       <div class="token-header">
         <span class="token-type-pill">${typeLabel}</span>
         <div class="flex items-center gap-1">
-          ${canDecomposeQuantity ? `<button class="token-action-btn token-decompose-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI)">⚛️</button>` : ''}
-          <button class="token-close-btn" title="Kaldır">✕</button>
+          ${canDecomposeQuantity ? `<button class="token-action-btn token-decompose-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI)"><i data-lucide="atom" class="w-3.5 h-3.5 text-cyan-400"></i></button>` : ''}
+          <button class="token-close-btn" title="Kaldır"><i data-lucide="x" class="w-3 h-3 text-slate-400"></i></button>
         </div>
       </div>
       <div class="token-body">
@@ -234,9 +235,9 @@ class InteractivePhysicsCanvas {
       <div class="formula-node-header">
         <span class="formula-badge-category">${formula.category}</span>
         <div class="flex items-center gap-1">
-          <button class="formula-action-btn formula-atomic-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI: m, x, t...)">⚛️</button>
-          <button class="formula-action-btn formula-decompose-btn" title="1 Adım Geri Ayrıştır">⤢</button>
-          <button class="token-close-btn" title="Kaldır">✕</button>
+          <button class="formula-action-btn formula-atomic-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI: m, x, t...)"><i data-lucide="atom" class="w-3.5 h-3.5 text-cyan-400"></i></button>
+          <button class="formula-action-btn formula-decompose-btn" title="1 Adım Geri Ayrıştır"><i data-lucide="split" class="w-3.5 h-3.5 text-amber-400"></i></button>
+          <button class="token-close-btn" title="Kaldır"><i data-lucide="x" class="w-3.5 h-3.5 text-slate-400"></i></button>
         </div>
       </div>
 
@@ -328,11 +329,19 @@ class InteractivePhysicsCanvas {
   attachNodeInteraction(nodeObj) {
     const el = nodeObj.el;
 
+    // Prevent pointerdown from initiating node drag on ALL buttons inside the node
+    el.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+      });
+    });
+
     // Remove button
     const closeBtn = el.querySelector('.token-close-btn');
     if (closeBtn) {
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        e.preventDefault();
         this.removeNode(nodeObj.id);
         window.soundManager.playPop();
       });
@@ -356,7 +365,9 @@ class InteractivePhysicsCanvas {
       
       this.draggedNode = nodeObj;
       el.classList.add('is-dragging');
-      el.setPointerCapture(e.pointerId);
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch (err) {}
 
       const rect = el.getBoundingClientRect();
       this.dragOffsetX = e.clientX - rect.left;
@@ -406,6 +417,12 @@ class InteractivePhysicsCanvas {
 
     const sourceNode = this.draggedNode;
     const targetNode = this.hoverTargetNode;
+
+    try {
+      if (sourceNode.el && sourceNode.el.hasPointerCapture && sourceNode.el.hasPointerCapture(e.pointerId)) {
+        sourceNode.el.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {}
 
     sourceNode.el.classList.remove('is-dragging');
     this.clearSvgLine();
@@ -728,11 +745,18 @@ class InteractivePhysicsCanvas {
   removeNode(id) {
     const node = this.nodes.get(id);
     if (node) {
+      if (this.draggedNode && this.draggedNode.id === id) {
+        this.draggedNode = null;
+      }
+      if (this.hoverTargetNode && this.hoverTargetNode.id === id) {
+        this.hoverTargetNode = null;
+      }
+      node.el.style.pointerEvents = 'none';
       node.el.classList.add('node-exit');
+      this.nodes.delete(id);
+      this.updateEmptyState();
       setTimeout(() => {
         node.el.remove();
-        this.nodes.delete(id);
-        this.updateEmptyState();
       }, 200);
     }
   }
@@ -787,16 +811,19 @@ class InteractivePhysicsCanvas {
     const nameB = itemB.symbol || itemB.title || 'B';
 
     if (reaction) {
-      this.hudPill.className = 'canvas-hud-pill hud-success';
+      this.hudPill.className = 'canvas-hud-pill hud-success flex items-center gap-1.5';
       this.hudPill.innerHTML = `
-        <span class="hud-sparkle">✦</span>
-        <span>${nameA} + ${nameB} ➔ <strong>${reaction.title}</strong></span>
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-300"></i>
+        <span>${nameA} + ${nameB} <i data-lucide="arrow-right" class="w-3 h-3 inline mx-0.5 text-emerald-400"></i> <strong>${reaction.title}</strong></span>
       `;
+      if (window.lucide) lucide.createIcons({ root: this.hudPill });
     } else {
-      this.hudPill.className = 'canvas-hud-pill hud-incompatible';
+      this.hudPill.className = 'canvas-hud-pill hud-incompatible flex items-center gap-1.5';
       this.hudPill.innerHTML = `
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-400"></i>
         <span>${nameA} + ${nameB} (Bağıntı yok)</span>
       `;
+      if (window.lucide) lucide.createIcons({ root: this.hudPill });
     }
   }
 

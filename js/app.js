@@ -35,7 +35,7 @@ class PhysicsAlchemyApp {
     this.soundIcon = document.getElementById('soundIcon');
     this.resetProgressBtn = document.getElementById('resetProgressBtn');
 
-    this.toggleAiPanelBtn = document.getElementById('toggleAiPanelBtn');
+    this.toggleAiPanelBtn = document.getElementById('openAiAssistantBtn') || document.getElementById('toggleAiPanelBtn');
     this.aiDrawer = document.getElementById('aiAssistantDrawer');
     this.quickHintBtn = document.getElementById('quickHintBtn');
 
@@ -160,12 +160,18 @@ class PhysicsAlchemyApp {
       });
     });
 
-    // AI Drawer toggle
+    // AI Drawer toggle & close
     if (this.toggleAiPanelBtn && this.aiDrawer) {
       this.toggleAiPanelBtn.addEventListener('click', () => {
-        this.aiDrawer.classList.toggle('hidden');
-        this.aiDrawer.classList.toggle('flex');
-        window.soundManager.playPop();
+        this.toggleAiDrawer();
+      });
+    }
+
+    const closeAiDrawerBtn = document.getElementById('closeAiDrawerBtn');
+    if (closeAiDrawerBtn) {
+      closeAiDrawerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeAiDrawer();
       });
     }
 
@@ -177,11 +183,29 @@ class PhysicsAlchemyApp {
     }
   }
 
+  toggleAiDrawer() {
+    if (!this.aiDrawer) return;
+    if (this.aiDrawer.classList.contains('hidden')) {
+      this.openAiDrawer();
+    } else {
+      this.closeAiDrawer();
+    }
+    window.soundManager.playPop();
+  }
+
   openAiDrawer() {
-    if (this.aiDrawer && this.aiDrawer.classList.contains('hidden')) {
+    if (this.aiDrawer) {
       this.aiDrawer.classList.remove('hidden');
       this.aiDrawer.classList.add('flex');
     }
+  }
+
+  closeAiDrawer() {
+    if (this.aiDrawer) {
+      this.aiDrawer.classList.add('hidden');
+      this.aiDrawer.classList.remove('flex');
+    }
+    window.soundManager.playPop();
   }
 
   updateSoundIcon(isMuted) {
@@ -298,7 +322,9 @@ class PhysicsAlchemyApp {
       });
 
       item.addEventListener('dragend', () => {
-        this.draggedSidebarQuantityId = null;
+        setTimeout(() => {
+          this.draggedSidebarQuantityId = null;
+        }, 100);
       });
 
       // Click to spawn on canvas

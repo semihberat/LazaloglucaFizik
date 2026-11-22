@@ -137,7 +137,9 @@
           <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-500"></i>
           <input type="text" id="quantitySearch" placeholder="Ara (kütle, m, Newton...)"
             class="w-full bg-slate-950/90 border border-slate-800 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
-          <button id="clearSearchBtn" class="hidden absolute right-2 text-slate-500 hover:text-slate-300 text-xs p-0.5" title="Aramayı Temizle">✕</button>
+          <button id="clearSearchBtn" class="hidden absolute right-2 text-slate-500 hover:text-slate-300 p-0.5 rounded transition flex items-center justify-center" title="Aramayı Temizle">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
 
         <!-- Filter Chips -->
@@ -282,16 +284,19 @@
       <div
         class="p-2 border-b border-slate-800/80 bg-slate-950/50 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px] flex-shrink-0">
         <button id="aiHintBtn"
-          class="px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-800/60 text-purple-300 hover:bg-purple-900/80 hover:text-white transition whitespace-nowrap active:scale-95">
-          💡 Sonraki İpucu
+          class="px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-800/60 text-purple-300 hover:bg-purple-900/80 hover:text-white transition whitespace-nowrap active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Sonraki İpucu</span>
         </button>
         <button id="aiScalarInfoBtn"
-          class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition whitespace-nowrap active:scale-95">
-          📐 Skaler vs Vektör
+          class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition whitespace-nowrap active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Skaler vs Vektör</span>
         </button>
         <button id="aiQuantumBtn"
-          class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition whitespace-nowrap active:scale-95">
-          ⚡ Enerji Korunumu
+          class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white transition whitespace-nowrap active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-400"></i>
+          <span>Enerji Korunumu</span>
         </button>
       </div>
 
@@ -302,9 +307,10 @@
             <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i> LazalBot Fizik Laboratuvarı Sezgi Motoru
           </p>
           <p class="text-xs text-slate-300">Masanın üzerindeki büyüklükleri birbirinin veya formüllerin üzerine sürükleyerek evrenin bağıntılarını inşa edebilirsin.</p>
-          <p class="text-[11px] text-slate-400 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
-            💡 Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak <strong>LazalBot</strong>'un derin boyut analizini, evren analojilerini ve sınır durum yorumlarını canlı olarak alabilirsin.
-          </p>
+          <div class="text-[11px] text-slate-400 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800 flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5"></i>
+            <span>Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak <strong>LazalBot</strong>'un derin boyut analizini, evren analojilerini ve sınır durum yorumlarını canlı olarak alabilirsin.</span>
+          </div>
         </div>
       </div>
 
@@ -435,8 +441,9 @@
         <input type="password" id="geminiApiKeyInput" placeholder="Özel API Anahtarı (Opsiyonel)..."
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-purple-500">
 
-        <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400">
-          <p>💡 Anahtar girmediğin takdirde <strong>LazalBot Dahili Çekirdeği</strong> çalışır; formülleri ve derin fizik teorilerini eksiksiz tartışır.</p>
+        <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i>
+          <p>Anahtar girmediğin takdirde <strong>LazalBot Dahili Çekirdeği</strong> çalışır; formülleri ve derin fizik teorilerini eksiksiz tartışır.</p>
         </div>
       </div>
 
