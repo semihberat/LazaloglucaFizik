@@ -78,16 +78,22 @@ class InteractivePhysicsCanvas {
         const targetId = targetEl.dataset.nodeId;
         const targetNode = this.nodes.get(targetId);
         if (targetNode) {
-          this.attemptFusion(targetNode, { type: 'quantity', data: quantity });
-          return;
+          const reaction = PHYSICS_DATA.findReaction(targetNode.data, quantity);
+          if (reaction) {
+            this.attemptFusion(targetNode, { type: 'quantity', data: quantity });
+            return;
+          }
         }
       }
 
       // Check proximity to any node within 55px for deliberate fusion
       const nearbyNode = this.findNearbyNode(dropX, dropY, 55);
       if (nearbyNode) {
-        this.attemptFusion(nearbyNode, { type: 'quantity', data: quantity });
-        return;
+        const reaction = PHYSICS_DATA.findReaction(nearbyNode.data, quantity);
+        if (reaction) {
+          this.attemptFusion(nearbyNode, { type: 'quantity', data: quantity });
+          return;
+        }
       }
 
       // Otherwise spawn a new token at cursor position
@@ -461,11 +467,17 @@ class InteractivePhysicsCanvas {
         this.hoverTargetNode.el.classList.remove('snap-hover');
       }
       this.hoverTargetNode = nearby;
-      nearby.el.classList.add('snap-hover');
-      this.drawMagneticBond(this.draggedNode, nearby);
+      const reaction = PHYSICS_DATA.findReaction(this.draggedNode.data, nearby.data);
 
-      const reaction = PHYSICS_DATA.findReaction(this.draggedNode.data, nearby.data) || this.createCustomReaction(this.draggedNode.data, nearby.data);
-      this.showHudPreview(nearby.x, nearby.y, this.draggedNode.data, nearby.data, reaction);
+      if (reaction) {
+        nearby.el.classList.add('snap-hover');
+        this.drawMagneticBond(this.draggedNode, nearby, true);
+        this.showHudPreview(nearby.x, nearby.y, this.draggedNode.data, nearby.data, reaction);
+      } else {
+        nearby.el.classList.remove('snap-hover');
+        this.drawMagneticBond(this.draggedNode, nearby, false);
+        this.showHudPreview(nearby.x, nearby.y, this.draggedNode.data, nearby.data, null);
+      }
     } else {
       if (this.hoverTargetNode) {
         this.hoverTargetNode.el.classList.remove('snap-hover');
@@ -507,15 +519,10 @@ class InteractivePhysicsCanvas {
   }
 
   /**
-   * Attempt fusion between two entities (handles both registered and unregistered combinations)
+   * Attempt fusion between two entities (strictly valid physics literature formulas only)
    */
   attemptFusion(nodeA, nodeB) {
-    let reaction = PHYSICS_DATA.findReaction(nodeA.data, nodeB.data);
-
-    // If not a registered textbook formula, flexibly synthesize an unregistered custom physical formula!
-    if (!reaction) {
-      reaction = this.createCustomReaction(nodeA.data, nodeB.data);
-    }
+    const reaction = PHYSICS_DATA.findReaction(nodeA.data, nodeB.data);
 
     if (reaction) {
       window.soundManager.playSuccess();
@@ -550,12 +557,12 @@ class InteractivePhysicsCanvas {
         });
       }
 
-      // Record in App State only if it's an official registered discovery
-      if (window.appState && !reaction.isCustom) {
+      // Record in App State
+      if (window.appState) {
         window.appState.recordDiscovery(reaction);
       }
     } else {
-      // Incompatible fusion
+      // Incompatible fusion - strictly reject unregistered combinations
       window.soundManager.playError();
       if (nodeA && nodeA.el) {
         nodeA.el.classList.add('fusion-reject');
@@ -564,38 +571,11 @@ class InteractivePhysicsCanvas {
       if (nodeB && nodeB.el) {
         nodeB.el.classList.add('fusion-reject');
         setTimeout(() => nodeB.el.classList.remove('fusion-reject'), 450);
+      } else if (nodeB && !nodeB.id && nodeB.data) {
+        // If nodeB was dropped from sidebar, spawn it near nodeA so it's not lost
+        this.spawnQuantityNode(nodeB.data, (nodeA.x || 100) + 120, (nodeA.y || 100));
       }
     }
-  }
-
-  /**
-   * Dynamically synthesize a custom unregistered physical formula
-   */
-  createCustomReaction(entityA, entityB) {
-    const nameA = entityA.name || entityA.title || 'Bileşen A';
-    const nameB = entityB.name || entityB.title || 'Bileşen B';
-    const symA = entityA.symbol || 'A';
-    const symB = entityB.symbol || 'B';
-    const dimA = entityA.dimension || entityA.dimensional || '[1]';
-    const dimB = entityB.dimension || entityB.dimensional || '[1]';
-
-    const combinedDim = this.multiplyDimensions(dimA, dimB);
-    const customId = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-
-    return {
-      id: customId,
-      isCustom: true,
-      title: `${nameA} & ${nameB} Sentezi`,
-      katex: `${symA} \\cdot ${symB}`,
-      category: 'Özel Sentez',
-      badge: `${symA} · ${symB}`,
-      description: `Serbestçe sentezlenmiş özel fiziksel bileşik. Boyut: ${combinedDim}`,
-      inputs: [entityA.id || 'compA', entityB.id || 'compB'],
-      dimensional: combinedDim,
-      dimension: combinedDim,
-      wikiQuery: nameA,
-      intuition: `${nameA} (${symA}) ile ${nameB} (${symB}) büyüklüklerinin serbest fiziksel çarpımı. Boyut analizi: ${combinedDim}.`
-    };
   }
 
   /**
@@ -649,19 +629,6 @@ class InteractivePhysicsCanvas {
       }
     }
     return str || '[1]';
-  }
-
-  /**
-   * Helper: Multiply two dimension strings
-   */
-  multiplyDimensions(dimA, dimB) {
-    const pA = this.parseDimToPowers(dimA);
-    const pB = this.parseDimToPowers(dimB);
-    const combined = {};
-    for (const k of ['M', 'L', 'T', 'I', 'Θ', 'N', 'J']) {
-      combined[k] = (pA[k] || 0) + (pB[k] || 0);
-    }
-    return this.powersToDimStr(combined);
   }
 
   /**
@@ -843,7 +810,7 @@ class InteractivePhysicsCanvas {
     return null;
   }
 
-  drawMagneticBond(nodeA, nodeB) {
+  drawMagneticBond(nodeA, nodeB, compatible = true) {
     if (!this.svgLayer) return;
 
     const x1 = nodeA.x;
@@ -851,18 +818,27 @@ class InteractivePhysicsCanvas {
     const x2 = nodeB.x;
     const y2 = nodeB.y;
 
-    this.svgLayer.innerHTML = `
-      <defs>
-        <linearGradient id="magneticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
-          <stop offset="100%" stop-color="#10b981" stop-opacity="0.8"/>
-        </linearGradient>
-      </defs>
-      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
-            stroke="url(#magneticGrad)" stroke-width="3" stroke-dasharray="6,4" class="magnetic-beam"/>
-      <circle cx="${x1}" cy="${y1}" r="6" fill="#38bdf8"/>
-      <circle cx="${x2}" cy="${y2}" r="6" fill="#10b981"/>
-    `;
+    if (compatible) {
+      this.svgLayer.innerHTML = `
+        <defs>
+          <linearGradient id="magneticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
+              stroke="url(#magneticGrad)" stroke-width="3" stroke-dasharray="6,4" class="magnetic-beam"/>
+        <circle cx="${x1}" cy="${y1}" r="6" fill="#38bdf8"/>
+        <circle cx="${x2}" cy="${y2}" r="6" fill="#10b981"/>
+      `;
+    } else {
+      this.svgLayer.innerHTML = `
+        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
+              stroke="#f43f5e" stroke-width="2" stroke-dasharray="4,4" opacity="0.6"/>
+        <circle cx="${x1}" cy="${y1}" r="4" fill="#f43f5e"/>
+        <circle cx="${x2}" cy="${y2}" r="4" fill="#f43f5e"/>
+      `;
+    }
   }
 
   clearSvgLine() {
