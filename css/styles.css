@@ -48,8 +48,8 @@ body {
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -60,6 +60,51 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+#aiAssistantDrawer {
+  height: calc(100vh - 3.5rem) !important;
+  max-height: calc(100vh - 3.5rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#aiChatFeed {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 rgba(15, 23, 42, 0.8);
+}
+
+#aiChatFeed::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+
+#aiChatFeed::-webkit-scrollbar-track {
+  background: rgba(10, 14, 26, 0.8) !important;
+  border-radius: 9999px;
+}
+
+#aiChatFeed::-webkit-scrollbar-thumb {
+  background: #7c3aed !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#aiChatFeed::-webkit-scrollbar-thumb:hover {
+  background: #a855f7 !important;
 }
 
 /* ==========================================================================
