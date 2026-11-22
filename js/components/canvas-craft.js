@@ -40,7 +40,11 @@ class InteractivePhysicsCanvas {
             if (draggedQty) {
               const reaction = PHYSICS_DATA.findReaction(targetNode.data, draggedQty);
               this.showHudPreview(targetNode.x, targetNode.y, draggedQty, targetNode.data, reaction);
-              targetEl.classList.add('snap-hover');
+              if (reaction) {
+                targetEl.classList.add('snap-hover');
+              } else {
+                targetEl.classList.remove('snap-hover');
+              }
             }
           }
         }
