@@ -274,6 +274,7 @@
             <i data-lucide="settings" class="w-3.5 h-3.5"></i>
           </button>
           <button id="closeAiDrawerBtn" title="Kapat"
+            onclick="const d=document.getElementById('aiAssistantDrawer');if(d){d.classList.add('hidden');d.classList.remove('flex');d.style.display='none';}if(window.soundManager)window.soundManager.playPop();"
             class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
@@ -350,7 +351,9 @@
             <p id="wikiModalSubtitle" class="text-[10px] text-slate-400">Özgür Ansiklopedi Bilgisi</p>
           </div>
         </div>
-        <button id="closeWikiModalBtn" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+        <button id="closeWikiModalBtn"
+          onclick="if(window.wikiModalManager){window.wikiModalManager.close();}else{const w=document.getElementById('wikiModal');if(w){w.classList.add('opacity-0');setTimeout(()=>w.classList.add('hidden'),200);}}"
+          class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -393,6 +396,7 @@
             class="text-xs font-mono font-bold text-emerald-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg">0
             / 0</span>
           <button id="closeCodexModalBtn"
+            onclick="if(window.appState){window.appState.closeCodex();}else{const c=document.getElementById('codexModal');if(c){c.classList.add('opacity-0');setTimeout(()=>c.classList.add('hidden'),200);}}"
             class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
@@ -428,7 +432,9 @@
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> LazalBot Çekirdek Ayarları
         </h3>
-        <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-200">
+        <button id="closeAiSettingsBtn"
+          onclick="const s=document.getElementById('aiSettingsModal');if(s){s.classList.add('opacity-0');setTimeout(()=>s.classList.add('hidden'),200);}"
+          class="text-slate-400 hover:text-slate-200">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>

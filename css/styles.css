@@ -34,6 +34,11 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+button svg,
+button i {
+  pointer-events: none;
+}
+
 /* Restrict unselectable behavior specifically to the interactive canvas workspace and draggable pills */
 .canvas-blueprint-grid,
 .draggable-token,
@@ -283,19 +288,24 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.15s ease;
   cursor: pointer;
+  pointer-events: auto !important;
+  z-index: 25;
+}
+.token-close-btn * {
+  pointer-events: none;
 }
 .token-close-btn:hover {
   color: #f43f5e;
-  border-color: rgba(244, 63, 94, 0.4);
-  background: rgba(244, 63, 94, 0.15);
-  transform: scale(1.08);
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.2);
+  transform: scale(1.1);
 }
 
 .token-body {

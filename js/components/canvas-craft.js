@@ -83,8 +83,8 @@ class InteractivePhysicsCanvas {
         }
       }
 
-      // Check proximity to any node within 75px
-      const nearbyNode = this.findNearbyNode(dropX, dropY, 80);
+      // Check proximity to any node within 55px for deliberate fusion
+      const nearbyNode = this.findNearbyNode(dropX, dropY, 55);
       if (nearbyNode) {
         this.attemptFusion(nearbyNode, { type: 'quantity', data: quantity });
         return;
@@ -329,22 +329,18 @@ class InteractivePhysicsCanvas {
   attachNodeInteraction(nodeObj) {
     const el = nodeObj.el;
 
-    // Prevent pointerdown from initiating node drag on ALL buttons inside the node
-    el.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('pointerdown', (e) => {
-        e.stopPropagation();
-      });
-    });
-
     // Remove button
     const closeBtn = el.querySelector('.token-close-btn');
     if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
+      const doClose = (e) => {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
         this.removeNode(nodeObj.id);
         window.soundManager.playPop();
-      });
+      };
+      closeBtn.addEventListener('click', doClose);
     }
 
     // Wiki quick info for tokens
@@ -358,16 +354,17 @@ class InteractivePhysicsCanvas {
       });
     }
 
-    // Pointer Drag Handling
+    // Pointer Drag Handling - Smooth, unconstrained freeform dragging
     el.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('button')) return; // Ignore if clicked on a button
+      // Do not drag if clicked on any interactive button
+      if (e.target.closest('button')) return;
       e.preventDefault();
       
       this.draggedNode = nodeObj;
       el.classList.add('is-dragging');
-      try {
-        el.setPointerCapture(e.pointerId);
-      } catch (err) {}
+
+      // Bring active card to the front of the canvas
+      this.nodesContainer.appendChild(el);
 
       const rect = el.getBoundingClientRect();
       this.dragOffsetX = e.clientX - rect.left;
@@ -384,23 +381,29 @@ class InteractivePhysicsCanvas {
     const newX = e.clientX - canvasRect.left - this.dragOffsetX;
     const newY = e.clientY - canvasRect.top - this.dragOffsetY;
 
-    this.draggedNode.el.style.left = `${newX}px`;
-    this.draggedNode.el.style.top = `${newY}px`;
+    const nodeWidth = this.draggedNode.el.offsetWidth || 130;
+    const nodeHeight = this.draggedNode.el.offsetHeight || 100;
 
-    const nodeWidth = this.draggedNode.el.offsetWidth;
-    const nodeHeight = this.draggedNode.el.offsetHeight;
-    this.draggedNode.x = newX + nodeWidth / 2;
-    this.draggedNode.y = newY + nodeHeight / 2;
+    // Clamp coordinates safely within the canvas workspace
+    const maxLeft = Math.max(10, this.canvas.clientWidth - nodeWidth - 10);
+    const maxTop = Math.max(10, this.canvas.clientHeight - nodeHeight - 10);
+    const clampedX = Math.max(10, Math.min(maxLeft, newX));
+    const clampedY = Math.max(10, Math.min(maxTop, newY));
 
-    // Check proximity to other nodes for magnetic fusion snap!
-    const nearby = this.findNearbyNode(this.draggedNode.x, this.draggedNode.y, 110, this.draggedNode.id);
+    this.draggedNode.el.style.left = `${clampedX}px`;
+    this.draggedNode.el.style.top = `${clampedY}px`;
+    this.draggedNode.x = clampedX + nodeWidth / 2;
+    this.draggedNode.y = clampedY + nodeHeight / 2;
+
+    // Check proximity to other nodes for magnetic fusion snap (tight, deliberate 65px radius)
+    const nearby = this.findNearbyNode(this.draggedNode.x, this.draggedNode.y, 65, this.draggedNode.id);
 
     if (nearby) {
       this.hoverTargetNode = nearby;
       nearby.el.classList.add('snap-hover');
       this.drawMagneticBond(this.draggedNode, nearby);
 
-      const reaction = PHYSICS_DATA.findReaction(this.draggedNode.data, nearby.data);
+      const reaction = PHYSICS_DATA.findReaction(this.draggedNode.data, nearby.data) || this.createCustomReaction(this.draggedNode.data, nearby.data);
       this.showHudPreview(nearby.x, nearby.y, this.draggedNode.data, nearby.data, reaction);
     } else {
       if (this.hoverTargetNode) {
@@ -418,15 +421,15 @@ class InteractivePhysicsCanvas {
     const sourceNode = this.draggedNode;
     const targetNode = this.hoverTargetNode;
 
-    try {
-      if (sourceNode.el && sourceNode.el.hasPointerCapture && sourceNode.el.hasPointerCapture(e.pointerId)) {
-        sourceNode.el.releasePointerCapture(e.pointerId);
-      }
-    } catch (err) {}
-
     sourceNode.el.classList.remove('is-dragging');
     this.clearSvgLine();
     this.hideHudPreview();
+
+    // Preserve exact drop location coordinates
+    const nodeWidth = sourceNode.el.offsetWidth || 130;
+    const nodeHeight = sourceNode.el.offsetHeight || 100;
+    sourceNode.x = parseInt(sourceNode.el.style.left) + nodeWidth / 2;
+    sourceNode.y = parseInt(sourceNode.el.style.top) + nodeHeight / 2;
 
     if (targetNode) {
       targetNode.el.classList.remove('snap-hover');

@@ -197,6 +197,7 @@ class PhysicsAlchemyApp {
     if (this.aiDrawer) {
       this.aiDrawer.classList.remove('hidden');
       this.aiDrawer.classList.add('flex');
+      this.aiDrawer.style.display = 'flex';
     }
   }
 
@@ -204,6 +205,7 @@ class PhysicsAlchemyApp {
     if (this.aiDrawer) {
       this.aiDrawer.classList.add('hidden');
       this.aiDrawer.classList.remove('flex');
+      this.aiDrawer.style.display = 'none';
     }
     window.soundManager.playPop();
   }

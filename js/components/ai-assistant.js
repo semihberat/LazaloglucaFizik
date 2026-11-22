@@ -29,12 +29,10 @@ class AIAssistant {
     if (this.closeBtn && this.drawer) {
       this.closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (window.appState && typeof window.appState.closeAiDrawer === 'function') {
-          window.appState.closeAiDrawer();
-        } else {
-          this.drawer.classList.add('hidden');
-          this.drawer.classList.remove('flex');
-        }
+        this.drawer.classList.add('hidden');
+        this.drawer.classList.remove('flex');
+        this.drawer.style.display = 'none';
+        if (window.soundManager) window.soundManager.playPop();
       });
     }
 
