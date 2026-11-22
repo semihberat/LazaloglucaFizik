@@ -194,10 +194,12 @@
         <!-- Right: Canvas Controls -->
         <div class="pointer-events-auto flex items-center gap-2">
           <button id="presetDemoBtn"
+            onclick="if(window.interactiveCanvas) window.interactiveCanvas.spawnDemoPair();"
             class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs text-cyan-300 backdrop-blur-md transition shadow flex items-center gap-1.5 active:scale-95">
             <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Örnek Diz
           </button>
           <button id="clearCanvasBtn"
+            onclick="if(window.interactiveCanvas) window.interactiveCanvas.clearAll();"
             class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs text-slate-300 backdrop-blur-md transition shadow flex items-center gap-1.5 active:scale-95">
             <i data-lucide="trash-2" class="w-3.5 h-3.5 text-slate-400"></i> Masayı Temizle
           </button>
@@ -351,6 +353,7 @@
             <p id="wikiModalSubtitle" class="text-[10px] text-slate-400">Özgür Ansiklopedi Bilgisi</p>
           </div>
         </div>
+        <button id="closeWikiModalBtn" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
         <button id="closeWikiModalBtn"
           onclick="if(window.wikiModalManager){window.wikiModalManager.close();}else{const w=document.getElementById('wikiModal');if(w){w.classList.add('opacity-0');setTimeout(()=>w.classList.add('hidden'),200);}}"
           class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
@@ -432,6 +435,7 @@
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> LazalBot Çekirdek Ayarları
         </h3>
+        <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-200">
         <button id="closeAiSettingsBtn"
           onclick="const s=document.getElementById('aiSettingsModal');if(s){s.classList.add('opacity-0');setTimeout(()=>s.classList.add('hidden'),200);}"
           class="text-slate-400 hover:text-slate-200">

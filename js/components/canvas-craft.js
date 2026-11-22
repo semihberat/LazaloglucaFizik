@@ -149,7 +149,7 @@ class InteractivePhysicsCanvas {
   /**
    * Spawn a Physical Quantity Token
    */
-  spawnQuantityNode(quantity, x, y) {
+  spawnQuantityNode(quantity, x, y, constituents = null) {
     const instanceId = 'node_' + (this.nextInstanceId++);
     const el = document.createElement('div');
     el.className = 'canvas-node quantity-token';
@@ -191,7 +191,9 @@ class InteractivePhysicsCanvas {
     el.style.top = `${Math.max(20, Math.min(this.canvas.clientHeight - 130, y - 60))}px`;
 
     this.nodesContainer.appendChild(el);
-    lucide.createIcons({ root: el });
+    if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+      try { lucide.createIcons(); } catch (e) {}
+    }
 
     const nodeObj = {
       id: instanceId,
@@ -275,7 +277,9 @@ class InteractivePhysicsCanvas {
     el.style.top = `${Math.max(20, Math.min(this.canvas.clientHeight - 190, y - 90))}px`;
 
     this.nodesContainer.appendChild(el);
-    lucide.createIcons({ root: el });
+    if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+      try { lucide.createIcons(); } catch (e) {}
+    }
 
     const nodeObj = {
       id: instanceId,
@@ -292,32 +296,44 @@ class InteractivePhysicsCanvas {
     this.updateEmptyState();
 
     // Actions
-    el.querySelector('.formula-wiki-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.wikiModalManager) {
-        window.wikiModalManager.openFor(formula.wikiQuery, formula.title);
-      }
-    });
+    const wikiBtn = el.querySelector('.formula-wiki-btn');
+    if (wikiBtn) {
+      wikiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.wikiModalManager) {
+          window.wikiModalManager.openFor(formula.wikiQuery, formula.title);
+        }
+      });
+    }
 
-    el.querySelector('.formula-ai-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.appState) {
-        window.appState.openAiDrawer();
-      }
-      if (window.aiAssistant) {
-        window.aiAssistant.explainFormulaDeeply(formula);
-      }
-    });
+    const aiBtn = el.querySelector('.formula-ai-btn');
+    if (aiBtn) {
+      aiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.appState) {
+          window.appState.openAiDrawer();
+        }
+        if (window.aiAssistant) {
+          window.aiAssistant.explainFormulaDeeply(formula);
+        }
+      });
+    }
 
-    el.querySelector('.formula-atomic-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.decomposeAtomic(nodeObj);
-    });
+    const atomicBtn = el.querySelector('.formula-atomic-btn');
+    if (atomicBtn) {
+      atomicBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.decomposeAtomic(nodeObj);
+      });
+    }
 
-    el.querySelector('.formula-decompose-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.decomposeStep(nodeObj);
-    });
+    const decomposeBtn = el.querySelector('.formula-decompose-btn');
+    if (decomposeBtn) {
+      decomposeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.decomposeStep(nodeObj);
+      });
+    }
 
     // Spawn entrance ripple
     el.classList.add('node-enter');
@@ -363,8 +379,9 @@ class InteractivePhysicsCanvas {
       this.draggedNode = nodeObj;
       el.classList.add('is-dragging');
 
-      // Bring active card to the front of the canvas
-      this.nodesContainer.appendChild(el);
+      // Bring active card to the front using z-index without detaching DOM node (preserves drag gestures seamlessly)
+      this.highestZ = (this.highestZ || 100) + 1;
+      el.style.zIndex = this.highestZ;
 
       const rect = el.getBoundingClientRect();
       this.dragOffsetX = e.clientX - rect.left;
@@ -372,6 +389,47 @@ class InteractivePhysicsCanvas {
 
       window.soundManager.playPop();
     });
+  }
+
+  /**
+   * Robust target detection for fusion: checks bounding box overlap or close proximity
+   */
+  findTargetNodeForFusion(draggedNode) {
+    if (!draggedNode || !draggedNode.el) return null;
+    const dragRect = draggedNode.el.getBoundingClientRect();
+    const dragCx = dragRect.left + dragRect.width / 2;
+    const dragCy = dragRect.top + dragRect.height / 2;
+
+    let bestTarget = null;
+    let minDistance = Infinity;
+
+    for (const [id, node] of this.nodes) {
+      if (id === draggedNode.id || !node.el) continue;
+
+      const targetRect = node.el.getBoundingClientRect();
+      const targetCx = targetRect.left + targetRect.width / 2;
+      const targetCy = targetRect.top + targetRect.height / 2;
+
+      // Check bounding box intersection (with 25px generous margin)
+      const isIntersecting = !(
+        dragRect.right < targetRect.left + 25 ||
+        dragRect.left > targetRect.right - 25 ||
+        dragRect.bottom < targetRect.top + 25 ||
+        dragRect.top > targetRect.bottom - 25
+      );
+
+      const dist = Math.hypot(targetCx - dragCx, targetCy - dragCy);
+
+      // Trigger if bounding boxes intersect or centers are within magnetic proximity (115px)
+      if (isIntersecting || dist < 115) {
+        if (dist < minDistance) {
+          minDistance = dist;
+          bestTarget = node;
+        }
+      }
+    }
+
+    return bestTarget;
   }
 
   onPointerMove(e) {
@@ -395,10 +453,13 @@ class InteractivePhysicsCanvas {
     this.draggedNode.x = clampedX + nodeWidth / 2;
     this.draggedNode.y = clampedY + nodeHeight / 2;
 
-    // Check proximity to other nodes for magnetic fusion snap (tight, deliberate 65px radius)
-    const nearby = this.findNearbyNode(this.draggedNode.x, this.draggedNode.y, 65, this.draggedNode.id);
+    // Detect target for fusion via bounding box overlap
+    const nearby = this.findTargetNodeForFusion(this.draggedNode);
 
     if (nearby) {
+      if (this.hoverTargetNode && this.hoverTargetNode.id !== nearby.id) {
+        this.hoverTargetNode.el.classList.remove('snap-hover');
+      }
       this.hoverTargetNode = nearby;
       nearby.el.classList.add('snap-hover');
       this.drawMagneticBond(this.draggedNode, nearby);
@@ -419,7 +480,12 @@ class InteractivePhysicsCanvas {
     if (!this.draggedNode) return;
 
     const sourceNode = this.draggedNode;
-    const targetNode = this.hoverTargetNode;
+    let targetNode = this.hoverTargetNode;
+
+    // Fallback detection if dropped directly over another node
+    if (!targetNode) {
+      targetNode = this.findTargetNodeForFusion(sourceNode);
+    }
 
     sourceNode.el.classList.remove('is-dragging');
     this.clearSvgLine();
