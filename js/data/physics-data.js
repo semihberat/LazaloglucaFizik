@@ -86,6 +86,32 @@ const PHYSICS_DATA = {
       icon: 'thermometer'
     },
     {
+      id: 'amount_of_substance',
+      name: 'Madde Miktarı',
+      symbol: 'n',
+      unit: 'mol',
+      type: 'scalar',
+      dimension: '[N]',
+      category: 'Termodinamik',
+      description: 'Avogadro sayısı kadar (6.022×10²³) temel tanecik içeren sistemin temel skaler büyüklüğüdür.',
+      wikiQuery: 'Mol',
+      isDefaultUnlocked: true,
+      icon: 'layers'
+    },
+    {
+      id: 'luminous_intensity',
+      name: 'Işık Şiddeti',
+      symbol: 'Iv',
+      unit: 'cd (Kandela)',
+      type: 'scalar',
+      dimension: '[J]',
+      category: 'Optik',
+      description: 'Işık kaynağının birim uzay açıda yaydığı ışık gücünün fotometrik ölçüsüdür.',
+      wikiQuery: 'Işık şiddeti',
+      isDefaultUnlocked: true,
+      icon: 'sun'
+    },
+    {
       id: 'speed_of_light',
       name: 'Işık Hızı',
       symbol: 'c',
@@ -398,6 +424,32 @@ const PHYSICS_DATA = {
       wikiQuery: 'Dalga boyu',
       isDefaultUnlocked: false,
       icon: 'waves'
+    },
+    {
+      id: 'molar_mass',
+      name: 'Molar Kütle',
+      symbol: 'M',
+      unit: 'kg/mol',
+      type: 'scalar',
+      dimension: '[M][N]⁻¹',
+      category: 'Madde & Kimya',
+      description: 'Bir maddenin bir molünün kütlesidir (M = m / n).',
+      wikiQuery: 'Molar kütle',
+      isDefaultUnlocked: false,
+      icon: 'box'
+    },
+    {
+      id: 'illuminance',
+      name: 'Aydınlanma Şiddeti',
+      symbol: 'E_a',
+      unit: 'lx (Lüks)',
+      type: 'scalar',
+      dimension: '[J][L]⁻²',
+      category: 'Optik',
+      description: 'Birim yüzeye dik düşen ışık akısı miktarıdır (E = Iv / A).',
+      wikiQuery: 'Aydınlanma şiddeti',
+      isDefaultUnlocked: false,
+      icon: 'sun-medium'
     }
   ],
 
@@ -730,6 +782,49 @@ const PHYSICS_DATA = {
       wikiQuery: 'Dalga boyu',
       intuition: 'Denizdeki dalgaların sıklığı ile tepe aralıkları çarpıldığında dalganın kıyıya ulaşma hızı bulunur.',
       dimensional: '[L] · [T]⁻¹ = [L][T]⁻¹ (m/s)'
+    },
+    {
+      id: 'molar_mass_formula',
+      inputs: ['mass', 'amount_of_substance'],
+      operation: 'divide',
+      resultQuantityId: 'molar_mass',
+      title: 'Molar Kütle Bağıntısı',
+      katex: 'M = \\frac{m}{n}',
+      badge: 'Skaler / Skaler = Skaler',
+      category: 'Termodinamik & Kimya',
+      description: 'Kütlenin madde miktarına (mol) oranı bir mol taneciğin kütlesini verir.',
+      wikiQuery: 'Molar kütle',
+      intuition: 'Avogadro sayısı kadar (6.022×10²³) taneciğin toplam kütlesidir. Karbon-12 için 12 g/mol dür.',
+      dimensional: '[M] / [N] = [M][N]⁻¹ (kg/mol)'
+    },
+    {
+      id: 'illuminance_formula',
+      inputs: ['luminous_intensity', 'area'],
+      fallbackInputs: ['luminous_intensity', 'distance'],
+      operation: 'divide',
+      resultQuantityId: 'illuminance',
+      title: 'Aydınlanma Şiddeti (Fotometri)',
+      katex: 'E = \\frac{I_v}{A} = \\frac{I_v}{d^2}',
+      badge: 'Skaler / Skaler = Skaler',
+      category: 'Optik',
+      description: 'Işık şiddetinin aydınlatılan alana veya mesafenin karesine oranı aydınlanma şiddetini verir.',
+      wikiQuery: 'Aydınlanma şiddeti',
+      intuition: 'Lambadan uzaklaştıkça okuduğun kitabın yüzeyindeki aydınlık mesafenin karesiyle hızla azalır.',
+      dimensional: '[J] / [L]² = [J][L]⁻² (Lüks, lx)'
+    },
+    {
+      id: 'ideal_gas_law',
+      inputs: ['amount_of_substance', 'temperature'],
+      operation: 'multiply',
+      resultQuantityId: 'work_energy',
+      title: 'İdeal Gaz Termal Durumu',
+      katex: 'P \\cdot V = n \\cdot R \\cdot T',
+      badge: 'Skaler × Skaler = Enerji Durumu',
+      category: 'Termodinamik',
+      description: 'Gazın basınç-hacim çarpımı madde miktarı (n) ve mutlak sıcaklık (T) ile orantılıdır.',
+      wikiQuery: 'İdeal gaz yasası',
+      intuition: 'Düdüklü tencerede gaz ısındıkça basıncın yükselmesi veya sıcak hava balonunun genleşmesi bu kanundur.',
+      dimensional: '[N] · [Θ] ➔ [M][L]²[T]⁻² (Joule)'
     }
   ],
 
