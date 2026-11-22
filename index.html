@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fizik Simyası | İnteraktif Formül Laboratuvarı</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            deep: '#080c14',
+            surface: '#0f1726',
+            subtle: '#162032',
+            borderSubtle: '#1e293b',
+            scalar: '#38bdf8',
+            vector: '#f43f5e',
+            constant: '#fbbf24',
+            formula: '#10b981'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for crystal-clear mathematical rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <script src="js/components/math-renderer.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Bespoke Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white overflow-hidden">
+
+  <!-- ================= TOP NAVIGATION / STATUS BAR ================= -->
+  <header class="h-14 border-b border-slate-800/80 bg-[#0b101c]/90 backdrop-blur-md px-4 lg:px-6 flex items-center justify-between z-30 flex-shrink-0">
+    
+    <!-- Left: App Identity -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center text-cyan-400 shadow-sm">
+        <i data-lucide="atom" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+          Fizik Simyası <span class="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Sandbox v3.0</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Center: Live Discovery Counters -->
+    <div class="hidden md:flex items-center gap-6 bg-slate-950/80 border border-slate-800/80 px-4 py-1.5 rounded-full text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">Keşif:</span>
+        <span id="headerFormulaCount" class="font-bold font-mono text-emerald-400">0 / 0 Formül</span>
+      </div>
+      <div class="h-3 w-px bg-slate-800"></div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">Büyüklük:</span>
+        <span id="headerQuantityCount" class="font-bold font-mono text-cyan-400">0 / 0</span>
+      </div>
+      <div class="w-24 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+        <div id="headerProgressBar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Right: Tools & Toggles -->
+    <div class="flex items-center gap-2">
+      <!-- AI Physics Coach Toggle -->
+      <button id="toggleAiPanelBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 text-xs font-medium transition active:scale-95">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+        <span>AI Fizikçi</span>
+      </button>
+
+      <!-- Codex Modal Toggle -->
+      <button id="openCodexBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition active:scale-95">
+        <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span class="hidden sm:inline">Formül Defteri</span>
+      </button>
+
+      <!-- Sound Mute Toggle -->
+      <button id="toggleSoundBtn" title="Ses Aç/Kapat" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition">
+        <i data-lucide="volume-2" class="w-3.5 h-3.5" id="soundIcon"></i>
+      </button>
+
+      <!-- Reset Canvas & Progress -->
+      <button id="resetProgressBtn" title="İlerlemeyi Sıfırla" class="p-2 rounded-lg bg-slate-900 hover:bg-rose-950/60 border border-slate-700 text-slate-400 hover:text-rose-400 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN WORKSPACE ================= -->
+  <main class="flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT DRAWER: PHYSICAL QUANTITIES INVENTORY -->
+    <aside class="w-72 lg:w-80 border-r border-slate-800/80 bg-[#0a0e1a]/95 flex flex-col flex-shrink-0 z-20">
+      
+      <!-- Inventory Header -->
+      <div class="p-3 border-b border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400"></i> Büyüklükler
+          </span>
+          <span id="inventoryBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800 font-mono">0 Açık</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-500"></i>
+          <input type="text" id="quantitySearch" placeholder="Ara (kütle, m, Newton...)" 
+                 class="w-full bg-slate-950/90 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1 text-[10px]">
+          <button data-filter="all" class="filter-btn active px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700">Tümü</button>
+          <button data-filter="scalar" class="filter-btn px-2.5 py-1 rounded bg-slate-900/60 text-cyan-400 border border-slate-800 hover:border-cyan-800 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Skaler
+          </button>
+          <button data-filter="vector" class="filter-btn px-2.5 py-1 rounded bg-slate-900/60 text-rose-400 border border-slate-800 hover:border-rose-800 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Vektörel
+          </button>
+          <button data-filter="constant" class="filter-btn px-2.5 py-1 rounded bg-slate-900/60 text-amber-400 border border-slate-800 hover:border-amber-800 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Sabit
+          </button>
+        </div>
+      </div>
+
+      <!-- Inventory Items List -->
+      <div id="quantitiesList" class="flex-1 overflow-y-auto p-2.5 space-y-1.5 scrollbar-thin">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- Bottom Hint & Helper -->
+      <div class="p-2.5 border-t border-slate-800/80 bg-slate-950/60 text-[11px] text-slate-400 flex items-center justify-between">
+        <span class="flex items-center gap-1 text-slate-500">
+          <i data-lucide="hand" class="w-3.5 h-3.5 text-cyan-400"></i> Masaya veya elemanın üstüne sürükle
+        </span>
+        <button id="quickHintBtn" class="text-cyan-400 hover:underline flex items-center gap-1">
+          <i data-lucide="lightbulb" class="w-3 h-3 text-amber-400"></i> İpucu
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER: THE INTERACTIVE BLUEPRINT CANVAS -->
+    <section class="flex-1 relative overflow-hidden flex flex-col bg-[#070a12]">
+      
+      <!-- Canvas Action Toolbar (Top Overlay) -->
+      <div class="absolute top-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+        
+        <!-- Left: Instruction Pill -->
+        <div class="pointer-events-auto bg-slate-900/90 border border-slate-800 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs text-slate-300 flex items-center gap-2 shadow-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>İki büyüklüğü veya <strong>bir büyüklüğü bir formülün üzerine</strong> sürükleyip birleştir!</span>
+        </div>
+
+        <!-- Right: Canvas Controls -->
+        <div class="pointer-events-auto flex items-center gap-2">
+          <button id="presetDemoBtn" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs text-cyan-300 backdrop-blur-md transition shadow flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Örnek Diz
+          </button>
+          <button id="clearCanvasBtn" class="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-xs text-slate-300 backdrop-blur-md transition shadow flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-slate-400"></i> Masayı Temizle
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Freeform Canvas Area -->
+      <div id="physicsCanvas" class="flex-1 w-full h-full relative overflow-hidden canvas-blueprint-grid">
+        
+        <!-- SVG Connection Layer (Magnetic bond line) -->
+        <svg id="canvasSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-10"></svg>
+
+        <!-- Dynamic Nodes Container -->
+        <div id="canvasNodesContainer" class="absolute inset-0 w-full h-full pointer-events-auto"></div>
+
+        <!-- Floating HUD Preview Pill -->
+        <div id="canvasHudPill" class="canvas-hud-pill hidden"></div>
+
+        <!-- Empty Canvas Placeholder -->
+        <div id="canvasEmptyState" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-6">
+          <div class="w-16 h-16 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 shadow-inner">
+            <i data-lucide="magnet" class="w-8 h-8 text-cyan-500/60"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-300">Laboratuvar Masası Boş</h3>
+          <p class="text-xs text-slate-500 max-w-sm mt-1 leading-relaxed">
+            Sol panelden büyüklükleri masaya sürükle. Birbirinin veya bir formülün üzerine bıraktığında doğanın kanunları otomatik olarak sentezlenir!
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Bottom Recent Discoveries Strip -->
+      <div class="h-10 border-t border-slate-800/80 bg-[#090d18]/90 backdrop-blur px-4 flex items-center justify-between text-xs text-slate-400 z-20 flex-shrink-0">
+        <div class="flex items-center gap-2 overflow-x-auto scrollbar-thin py-1" id="recentDiscoveriesStrip">
+          <span class="text-slate-600 text-[11px] italic">Henüz bir formül keşfedilmedi. İlk birleşimini yap!</span>
+        </div>
+        <button id="viewAllCodexLink" class="text-cyan-400 hover:underline text-[11px] whitespace-nowrap pl-2">Tümünü İncele →</button>
+      </div>
+
+    </section>
+
+    <!-- RIGHT SLIDE-OVER: AI PHYSICS TUTOR / INTUITION DRAWER -->
+    <aside id="aiAssistantDrawer" class="hidden w-80 lg:w-96 border-l border-slate-800/80 bg-[#0a0e1a]/98 flex-col flex-shrink-0 z-30 transition-all">
+      
+      <!-- AI Header -->
+      <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-purple-950 border border-purple-700/60 flex items-center justify-center text-purple-400">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold text-white">Fizik Sezgisi & AI</h2>
+            <p id="aiStatusText" class="text-[10px] text-purple-400">Dahili Akıllı Fizikçi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button id="openAiSettingsBtn" title="Gemini API Anahtarı" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+          </button>
+          <button id="closeAiDrawerBtn" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Action Pills -->
+      <div class="p-2 border-b border-slate-800/80 bg-slate-950/40 flex items-center gap-1.5 overflow-x-auto text-[10px]">
+        <button id="aiHintBtn" class="px-2.5 py-1 rounded bg-purple-950/60 border border-purple-800/60 text-purple-300 hover:bg-purple-900/80 whitespace-nowrap">
+          💡 Sonraki İpucu
+        </button>
+        <button id="aiScalarInfoBtn" class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 whitespace-nowrap">
+          📐 Skaler vs Vektör
+        </button>
+      </div>
+
+      <!-- Chat / Intuition Feed -->
+      <div id="aiChatFeed" class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin text-xs">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-slate-300 space-y-2 leading-relaxed">
+          <p class="font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i> Fizik Laboratuvarı Sezgi Motoru
+          </p>
+          <p>Masanın üzerindeki büyüklükleri birbirinin veya formüllerin üzerine sürükleyerek evrenin bağıntılarını inşa edebilirsin.</p>
+          <p class="text-[11px] text-slate-400 bg-slate-950 p-2 rounded border border-slate-800">
+            Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak formülün boyut analizini ve günlük hayattaki karşılığını inceleyebilirsin.
+          </p>
+        </div>
+      </div>
+
+      <!-- AI Prompt Form -->
+      <div class="p-3 border-t border-slate-800 bg-slate-950/90">
+        <form id="aiPromptForm" class="flex gap-2">
+          <input type="text" id="aiUserInput" placeholder="Fiziksel bir bağıntı veya soru sor..." 
+                 class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition">
+          <button type="submit" class="px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition active:scale-95">
+            Sor
+          </button>
+        </form>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ================= MODALS & SLIDE-OVERS ================= -->
+
+  <!-- WIKIPEDIA SLIDE-OVER INSPECTOR -->
+  <div id="wikiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-end hidden opacity-0 transition-opacity duration-200">
+    <div class="w-full max-w-xl bg-[#0b101d] border-l border-slate-800 h-full flex flex-col shadow-2xl overflow-hidden transform translate-x-full transition-transform duration-300">
+      
+      <!-- Wiki Header -->
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
+            <i data-lucide="globe" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="wikiModalTitle" class="text-sm font-bold text-white">Vikipedi Makalesi</h3>
+            <p id="wikiModalSubtitle" class="text-[10px] text-slate-400">Özgür Ansiklopedi Bilgisi</p>
+          </div>
+        </div>
+        <button id="closeWikiModalBtn" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Wiki Body -->
+      <div id="wikiModalBody" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-300"></div>
+
+      <!-- Wiki Footer -->
+      <div class="p-3.5 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500">Kaynak: tr.wikipedia.org</span>
+        <a id="wikiModalExternalLink" href="#" target="_blank" rel="noopener noreferrer" 
+           class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+          <span>Tam Makaleyi Oku</span>
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODEX FORMULA BOOK MODAL -->
+  <div id="codexModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+    <div class="w-full max-w-4xl bg-[#0b101d] border border-slate-800 rounded-2xl flex flex-col h-[85vh] shadow-2xl overflow-hidden">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Formül Defteri & Keşif Kütüphanesi</h3>
+            <p class="text-[11px] text-slate-400">Fiziksel kanunlar ve bağıntı arşivi</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <span id="codexCount" class="text-xs font-mono font-bold text-emerald-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg">0 / 0</span>
+          <button id="closeCodexModalBtn" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Codex Search & Filter -->
+      <div class="p-3 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-xs">
+          <button data-codex-filter="all" class="codex-filter-btn active px-3 py-1 rounded bg-slate-800 text-white border border-slate-700">Tümü</button>
+          <button data-codex-filter="discovered" class="codex-filter-btn px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">Keşfedilenler</button>
+          <button data-codex-filter="locked" class="codex-filter-btn px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">Kilitliler (???)</button>
+        </div>
+        <input type="text" id="codexSearch" placeholder="Formüllerde ara..." 
+               class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-48">
+      </div>
+
+      <!-- Codex Grid -->
+      <div id="codexGrid" class="flex-1 p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3 scrollbar-thin content-start"></div>
+    </div>
+  </div>
+
+  <!-- AI SETTINGS MODAL -->
+  <div id="aiSettingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+    <div class="w-full max-w-md bg-[#0b101d] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Google Gemini API Entegrasyonu
+        </h3>
+        <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-200">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed mb-4">
+        Canlı Google Gemini modelini kullanmak istersen API anahtarını girebilirsin. Anahtar tarayıcının yerel hafızasında saklanır.
+      </p>
+
+      <div class="space-y-3">
+        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." 
+               class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-purple-500">
+        
+        <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400">
+          <p>💡 Anahtar girmediğin takdirde <strong>Dahili Akıllı Fizik Sezgi Motoru</strong> çalışır; formülleri ve boyut analizlerini eksiksiz açıklar.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button id="clearApiKeyBtn" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs">Sil</button>
+        <button id="saveApiKeyBtn" class="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/data/physics-data.js"></script>
+  <script src="js/components/sound.js"></script>
+  <script src="js/components/wiki-modal.js"></script>
+  <script src="js/components/ai-assistant.js"></script>
+  <script src="js/components/canvas-craft.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

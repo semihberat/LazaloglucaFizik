@@ -1,0 +1,15 @@
+# Node & Dependencies
+node_modules/
+package-lock.json
+
+# Vercel
+.vercel/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
