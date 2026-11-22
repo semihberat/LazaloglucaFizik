@@ -2,21 +2,14 @@
   "name": "fizik-simyasi",
   "version": "1.0.0",
   "description": "Fizik Simyası | Skaler & Vektörel Formül Laboratuvarı",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "deploy": "npx vercel --prod"
+    "dev": "node server.js"
   },
   "keywords": [
     "physics",
     "math",
     "alchemy",
-    "interactive",
-    "science",
-    "katex",
-    "canvas"
+    "interactive"
   ],
-  "author": "",
   "license": "MIT"
 }
