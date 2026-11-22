@@ -20,6 +20,7 @@ class AIAssistant {
 
     // Conversation history for true multi-turn debates
     this.chatHistory = [];
+    this.lastApiError = null;
 
     this.initEvents();
     this.updateStatus();
@@ -131,11 +132,42 @@ class AIAssistant {
     }
   }
 
-  updateStatus() {
-    if (this.statusText) {
-      this.statusText.textContent = 'LazalBot Aktif (Çevrimiçi)';
-      this.statusText.className = 'text-[10px] text-emerald-400 font-medium';
+  updateStatus(statusType = null) {
+    if (!this.statusText) return;
+
+    const errorState = statusType || this.lastApiError;
+
+    if (errorState === 'QUOTA_EXCEEDED') {
+      this.statusText.textContent = '● Demo Kotası Doldu (Anahtar Ekle)';
+      this.statusText.className = 'text-[10px] text-amber-400 font-medium cursor-pointer hover:underline';
+      this.statusText.title = 'Ücretsiz demo kotası doldu. Tıklayarak kendi Google Gemini API anahtarını ekleyebilirsin.';
+      this.statusText.onclick = () => {
+        const modal = document.getElementById('aiSettingsModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+      };
+      return;
     }
+
+    if (errorState === 'INVALID_KEY') {
+      this.statusText.textContent = '● Geçersiz API Anahtarı';
+      this.statusText.className = 'text-[10px] text-rose-400 font-medium cursor-pointer hover:underline';
+      this.statusText.onclick = () => {
+        const modal = document.getElementById('aiSettingsModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+      };
+      return;
+    }
+
+    const hasCustomKey = !!localStorage.getItem('physics_alchemy_gemini_key');
+    this.statusText.textContent = hasCustomKey ? '● Özel Çekirdek Aktif' : '● Çevrimiçi';
+    this.statusText.className = 'text-[10px] text-emerald-400 font-medium';
+    this.statusText.onclick = null;
   }
 
   appendCard(sender, content, rawText = null) {
@@ -487,6 +519,8 @@ Görev ve Kuralların:
 
   async executeGeminiRequest(payload) {
     const modelsToTry = [this.primaryModel, ...this.fallbackModels];
+    let quotaHit = false;
+
     for (const model of modelsToTry) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
@@ -499,33 +533,135 @@ Görev ve Kuralların:
         if (response.ok) {
           const data = await response.json();
           if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            this.lastApiError = null;
+            this.updateStatus();
             return data.candidates[0].content.parts[0].text;
           }
+        } else {
+          if (response.status === 429) {
+            quotaHit = true;
+          }
+          console.warn(`Model ${model} returned HTTP ${response.status}`);
         }
       } catch (err) {
         console.warn(`Model ${model} request failed:`, err);
       }
     }
+
+    if (quotaHit) {
+      this.lastApiError = 'QUOTA_EXCEEDED';
+      this.updateStatus('QUOTA_EXCEEDED');
+    }
+
     return null;
   }
 
   respondOffline(userText) {
-    const text = userText.toLowerCase();
+    const text = userText.toLowerCase().trim();
+    let responseHtml = '';
 
-    if (text.includes('ipucu') || text.includes('ne yap') || text.includes('yardım')) {
+    // 1. Casual Greetings & Social Dialogue
+    if (/^(naber|nasılsın|nasilsin|selam|merhaba|sa|hey|naptın|nabıyon|nabiyorsun|günaydın|iyi günler|selamlar)/i.test(text)) {
+      responseHtml = `
+        <p>İyiyim dostum! Laboratuvarda kuantum dalgalanmalarını, evrenin temel korunum ilkelerini ve simetrilerini inceliyordum.</p>
+        <p>Sen nasılsın? Masada bugün hangi fizik kanunlarını birleştirip yeni bağıntılar keşfediyoruz?</p>
+      `;
+    }
+    // 2. Identity / Who are you
+    else if (text.includes('kimsin') || text.includes('nesin') || text.includes('adın ne') || text.includes('lazalbot kim')) {
+      responseHtml = `
+        <p>Ben <strong>LazalBot</strong>! <em>lazaloglucafizik</em> platformunun teorik ve deneysel fizik mentörüyüm.</p>
+        <p>Masandaki büyüklükleri analiz eder, formüllerin arkasındaki derin fiziksel sezgiyi (Feynman yaklaşımıyla) açıklar ve evrenin işleyişine dair her türlü teorik tartışmayı yürütürüm.</p>
+      `;
+    }
+    // 3. Hints & Guidance
+    else if (text.includes('ipucu') || text.includes('ne yap') || text.includes('yardım') || text.includes('tıkandım')) {
       this.generateHint();
       return;
     }
-    if (text.includes('skaler') || text.includes('vektör')) {
+    // 4. Scalar vs Vector
+    else if (text.includes('skaler') || text.includes('vektör')) {
       this.explainScalarVsVector();
       return;
     }
+    // 5. Quantum Mechanics
+    else if (text.includes('kuantum') || text.includes('schrödinger') || text.includes('heisenberg') || text.includes('foton') || text.includes('dalga')) {
+      responseHtml = `
+        <div class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1">
+          <i data-lucide="atom" class="w-4 h-4"></i> Kuantum Dünyası & Belirsizlik
+        </div>
+        <p>Kuantum mekaniğinde parçacıklar aynı zamanda dalga karakteri taşır. <strong>Heisenberg Belirsizlik İlkesi</strong> der ki; bir parçacığın konumunu ve momentumunu aynı anda kusursuz kesinlikle bilemezsin:</p>
+        <div class="p-2 my-1.5 rounded-lg bg-slate-950 border border-slate-800 text-center text-cyan-300 font-mono">
+          $$\\Delta x \\cdot \\Delta p \\ge \\frac{\\hbar}{2}$$
+        </div>
+        <p class="text-slate-300">Bu ölçüm aletlerimizin yetersizliğinden değil; doğanın ve dalga paketlerinin temel matematiksel yapısından kaynaklanır!</p>
+      `;
+    }
+    // 6. Relativity & Einstein
+    else if (text.includes('görelilik') || text.includes('relativite') || text.includes('einstein') || text.includes('zaman') || text.includes('ışık hızı')) {
+      responseHtml = `
+        <div class="font-bold text-amber-400 flex items-center gap-1.5 mb-1">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Özel ve Genel Görelilik
+        </div>
+        <p>Einstein'ın temel postülasına göre ışık hızı ($c$) evrendeki tüm eylemsiz gözlemciler için sabittir ($c \\approx 3 \\times 10^8 \\text{ m/s}$). Bir cisim hızlandıkça zaman onun için yavaş akar (Zaman Genişlemesi):</p>
+        <div class="p-2 my-1.5 rounded-lg bg-slate-950 border border-slate-800 text-center text-amber-300 font-mono">
+          $$t' = \\frac{t}{\\sqrt{1 - \\frac{v^2}{c^2}}}$$
+        </div>
+        <p class="text-slate-300">Ve kütle ile enerji birbirine dönüşebilir: <strong>$E = mc^2$</strong>!</p>
+      `;
+    }
+    // 7. Gravity & Black Holes
+    else if (text.includes('kara delik') || text.includes('kütleçekim') || text.includes('yerçekimi') || text.includes('gravitasyon')) {
+      responseHtml = `
+        <div class="font-bold text-purple-400 flex items-center gap-1.5 mb-1">
+          <i data-lucide="disc" class="w-4 h-4"></i> Kütleçekim ve Kara Delikler
+        </div>
+        <p>Newton'a göre iki kütle birbirini çeker ($F = G\\frac{m_1 m_2}{r^2}$). Einstein ise kütlenin uzay-zaman kumaşını büktüğünü gösterdi.</p>
+        <p>Eğer bir kütle kendi <strong>Schwarzschild Yarıçapı</strong> ($r_s = \\frac{2GM}{c^2}$) içine sıkışırsa, kaçış hızı ışık hızını aşar ve ışığın bile kaçamadığı bir kara delik doğar!</p>
+      `;
+    }
+    // 8. Thermodynamics & Entropy
+    else if (text.includes('termodinamik') || text.includes('entropi') || text.includes('sıcaklık') || text.includes('ısı')) {
+      responseHtml = `
+        <div class="font-bold text-rose-400 flex items-center gap-1.5 mb-1">
+          <i data-lucide="flame" class="w-4 h-4"></i> Termodinamik & Zamanın Oku
+        </div>
+        <p>Termodinamiğin 2. Kanunu evrenin yönünü tayin eder: İzole bir sistemin toplam entropisi (düzensizliği) asla azalmaz:</p>
+        <div class="p-2 my-1.5 rounded-lg bg-slate-950 border border-slate-800 text-center text-rose-300 font-mono">
+          $$\\Delta S \\ge 0$$
+        </div>
+        <p class="text-slate-300">Bardağın yere düşüp kırılması ve kırıkların kendiliğinden birleşmemesinin nedeni evrenin entropiyi artırma meylidir.</p>
+      `;
+    }
+    // 9. Default Intelligent Fallback
+    else {
+      const unlockedCount = window.appState ? window.appState.unlockedQuantities.size : 7;
+      const discoveredCount = window.appState ? window.appState.discoveredFormulas.size : 0;
+      responseHtml = `
+        <p>Sorunu fizik ilkeleriyle değerlendirelim:</p>
+        <p>Doğadaki tüm türetilmiş kanunlar temel büyüklüklerin ($m, x, t, I, T, n, I_v$) korunum ilkeleri ve simetrileri (Noether Teoremi) üzerinden kurulur.</p>
+        <p>Şu an laboratuvarında <strong>${unlockedCount} açık büyüklük</strong> ve <strong>${discoveredCount} keşfedilmiş formül</strong> bulunuyor. Kartları birbirinin üzerine sürükleyerek zincirleme fiziksel sentezler yapabilirsin!</p>
+      `;
+    }
 
-    this.appendCard('assistant', `
-      <p>Sorunu fiziksel ilkelerle değerlendirelim:</p>
-      <p>Doğadaki tüm türetilmiş kanunlar temel büyüklüklerin ($m, x, t, I, T, n, I_v$) korunum ilkeleri ve simetrileri üzerinden kurulur.</p>
-      <p>Örneğin masadaki bir formülün (örn: <strong>$F = ma$</strong>) üzerine başka bir büyüklük (örn: <strong>Mesafe $x$</strong>) sürükleyerek daha üst düzey kanunları (örn: <strong>$W = F \\cdot x$</strong>) zincirleme sentezleyebilirsin!</p>
-    `);
+    // If quota was exceeded, attach transparent warning banner with direct key entry shortcut
+    if (this.lastApiError === 'QUOTA_EXCEEDED') {
+      responseHtml += `
+        <div class="mt-3 pt-2.5 border-t border-amber-500/20 text-[11px] text-amber-300 flex items-center justify-between gap-2 bg-amber-950/30 p-2.5 rounded-xl border border-amber-500/30 select-text">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+            <span>Dahili demo API anahtarının günlük kotası (20 istek) doldu.</span>
+          </div>
+          <button onclick="const m=document.getElementById('aiSettingsModal');if(m){m.classList.remove('hidden');setTimeout(()=>m.classList.remove('opacity-0'),10);}" 
+                  class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-[10px] font-semibold whitespace-nowrap transition active:scale-95 flex items-center gap-1">
+            <i data-lucide="key" class="w-3 h-3"></i>
+            <span>Anahtar Ekle</span>
+          </button>
+        </div>
+      `;
+    }
+
+    this.appendCard('assistant', responseHtml);
   }
 }
 

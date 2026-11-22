@@ -435,7 +435,6 @@
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> LazalBot Çekirdek Ayarları
         </h3>
-        <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-200">
         <button id="closeAiSettingsBtn"
           onclick="const s=document.getElementById('aiSettingsModal');if(s){s.classList.add('opacity-0');setTimeout(()=>s.classList.add('hidden'),200);}"
           class="text-slate-400 hover:text-slate-200">
@@ -444,16 +443,24 @@
       </div>
 
       <p class="text-xs text-slate-300 leading-relaxed mb-4">
-        LazalBot varsayılan olarak entegre edilmiş güçlü fizik modelini kullanır. Kendi özel API anahtarınızı tanımlamak isterseniz buraya girebilirsiniz.
+        LazalBot varsayılan olarak entegre edilmiş demo yapay zeka modelini kullanır. Günlük ücretsiz demo kotası (20 istek) dolduğunda kesintisiz canlı tartışmaya devam etmek için kendi ücretsiz Google Gemini API anahtarını tanımlayabilirsin.
       </p>
 
       <div class="space-y-3">
-        <input type="password" id="geminiApiKeyInput" placeholder="Özel API Anahtarı (Opsiyonel)..."
+        <input type="password" id="geminiApiKeyInput" placeholder="Özel Gemini API Anahtarı (AIzaSy...)..."
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-purple-500">
 
         <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
-          <i data-lucide="info" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i>
-          <p>Anahtar girmediğin takdirde <strong>LazalBot Dahili Çekirdeği</strong> çalışır; formülleri ve derin fizik teorilerini eksiksiz tartışır.</p>
+          <i data-lucide="key" class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <p class="font-medium text-slate-300">Nasıl ücretsiz anahtar alırım?</p>
+            <p class="mt-0.5">Google AI Studio üzerinden 1 dakikada tamamen ücretsiz bir API anahtarı oluşturabilirsin (Günde 1500 istek):</p>
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"
+              class="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 underline font-semibold mt-1">
+              <span>aistudio.google.com/apikey</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
         </div>
       </div>
 
