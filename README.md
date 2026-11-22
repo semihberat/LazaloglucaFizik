@@ -1,65 +1,64 @@
 # ⚛️ Fizik Simyası (Physics Alchemy)
 
-Fizik ve matematikteki temel **skaler ve vektörel büyüklükleri** sürükle-bırak (Drag & Drop) mantığıyla birleştirerek evrenin kabul gören fizik formüllerini keşfettiğin, Vikipedi makaleleriyle derinleştiğin ve **Yapay Zeka (AI) Fizik Öğretmeni** desteğiyle öğrendiğin modern bir web uygulaması.
+Fizik ve matematikteki temel **skaler ve vektörel büyüklükleri** serbest çalışma masasında birbirinin veya diğer formüllerin üzerine sürükleyip bırakarak doğanın kabul gören formüllerini sentezlediğin, canlı Vikipedi makaleleri ve derin fizik sezgisiyle öğrendiğin modern interaktif laboratuvar uygulaması.
 
 ---
 
 ## 🌟 Öne Çıkan Özellikler
 
-1. **Skaler & Vektörel Büyüklük Paleti:**
-   - Kütle, Zaman, Uzunluk, Hız, İvme, Kuvvet, Enerji, Güç, Gerilim, Akım, Direnç, vb.
-   - Büyüklüklerin **Skaler (Mavi)** ve **Vektörel (Kırmızı)** olduğunu gösteren net renk kodlaması ve filtreler.
-   - SI Birimleri, semboller ve Boyut Analizi (örneğin: `[M][L][T]⁻²`).
-   - Hızlı arama ve kategori filtreleme (Kinematik, Dinamik, Elektromanyetizma, vb.).
+1. **Serbest Çalışma Masası (Blueprint Dot-Grid Canvas):**
+   - Hantal yuvalar yerine Dieter Rams ve Linear sadeliğinde serbest çalışma alanı.
+   - İster iki büyüklüğü (örn. $m$ ile $\vec{a}$), ister **bir büyüklüğü var olan bir formülün üzerine** (örn. $x$'i $F = ma$ kartının üzerine) sürükleyip birleştirebilme.
+   - Manyetik çekim bağı (SVG animasyonlu çizgi) ve anlık reaksiyon önizleme HUD'ı.
+   - Formülü bileşenlerine ayrıştırabilme (**⤢**) ve dilediğin gibi taşıyabilme.
 
-2. **Sentez Tezgahı (Drag & Drop Mekaniği):**
-   - Büyüklük kartlarını doğrudan sürükleyip yuvalara bırakabilir veya karta tıklayarak masaya yerleştirebilirsiniz.
-   - İşlem seçimi: **Çarpma ($\times$)**, **Bölme ($\div$)** veya **Otomatik Sentez ($\rightleftharpoons$)**.
-   - Doğru bir fiziksel bağıntı yakalandığında:
-     - 🎊 Konfeti patlaması
-     - 🎵 Web Audio API ile üretilmiş zafer sesi (sıfır harici dosya bağımlılığı)
-     - 📐 KaTeX ile kusursuz LaTeX matematiksel formül kartı
-     - 🔓 Yeni türetilmiş büyüklüklerin kilidinin açılması!
+2. **Kusursuz KaTeX Matematik Dizgisi:**
+   - Tüm formüller kristal netliğinde KaTeX LaTeX motoruyla akademik standartta render edilir.
 
-3. **Canlı Vikipedi Entegrasyonu:**
-   - Keşfedilen her formül ve büyüklük kartında yer alan **"Vikipedi'de İncele"** butonu.
-   - Vikipedi REST API üzerinden anında Türkçe makale özeti, görseli ve doğrudan tam makale bağlantısı.
+3. **Canlı Vikipedi & Sezgi Motoru:**
+   - Her formül kartında tek tıkla açılan zarif Vikipedi yan paneli.
+   - Formülün boyut analizini (`[M][L]²[T]⁻²`) ve günlük hayattaki sezgisel karşılığını açıklayan modül.
+   - Dileyenler için Google Gemini API entegrasyonu.
 
-4. **Yapay Zeka (AI) Fizik Asistanı:**
-   - **Çift Motorlu Yapı:**
-     - 🧠 **Google Gemini API Desteği:** Ayarlardan kendi Gemini API anahtarını ekleyerek gerçek zamanlı yapay zeka ile sınırsız fizik sohbeti.
-     - ⚡ **Dahili Akıllı Heuristik Fizikçi:** API anahtarı olmadan da elindeki büyüklüklere göre bir sonraki mantıklı birleşimi öneren akıllı ipucu motoru!
-   - Tek tıkla: "💡 Bir Sonraki İpucu", "🔬 Son Formülü Açıkla", "📐 Skaler vs Vektör Nedir?".
-
-5. **Formül Defteri (Codex):**
-   - Keşfettiğin tüm formülleri kaydeden ve henüz keşfedilmemiş olanları soru işaretiyle gösteren kütüphane.
-   - İlerleme durumu (Örn: `12 / 20 Keşfedildi`) ve ilerleme çubuğu.
-   - LocalStorage ile otomatik kayıt (tarayıcıyı kapatsan bile ilerlemen kaybolmaz).
+4. **Formül Defteri (Codex):**
+   - Keşfedilen tüm kanunların arşivi ve yerel hafıza (`localStorage`) ile otomatik ilerleme kaydı.
 
 ---
 
-## 🚀 Nasıl Çalıştırılır?
+## 🚀 Yerel Olarak Çalıştırma
 
-### Yöntem 1: Doğrudan Tarayıcıda Açma (En Basit)
-Herhangi bir kurulum yapmadan doğrudan klasördeki `index.html` dosyasına çift tıklayarak Chrome, Edge, Brave veya Firefox üzerinde açabilirsiniz!
+### Yöntem 1 (Kuruluma gerek yok):
+Klasördeki `index.html` dosyasına çift tıklayarak doğrudan Chrome veya Edge'de açabilirsiniz.
 
-### Yöntem 2: Node.js ile Yerel Sunucu Başlatma
-Terminal veya PowerShell üzerinden:
-```powershell
+### Yöntem 2 (Yerel Sunucu ile):
+```bash
 node server.js
 ```
 Ardından tarayıcınızdan **`http://localhost:3000`** adresine gidin.
 
 ---
 
-## 🧪 Bazı Başlangıç Reçeteleri (İpuçları)
+## ☁️ Vercel Dağıtımı (Deployment)
 
-- **Mesafe ($x$)** $\div$ **Zaman ($t$)** $\rightarrow$ **Sürat / Hız ($v$)**
-- **Hız ($v$)** $\div$ **Zaman ($t$)** $\rightarrow$ **İvme ($a$)**
-- **Kütle ($m$)** $\times$ **İvme ($a$)** $\rightarrow$ **Kuvvet ($F$)** *(Newton'un II. Yasası)*
-- **Kütle ($m$)** $\times$ **Yerçekimi İvmesi ($g$)** $\rightarrow$ **Ağırlık ($G$)**
-- **Kuvvet ($F$)** $\times$ **Mesafe ($x$)** $\rightarrow$ **İş / Enerji ($W$)**
-- **İş ($W$)** $\div$ **Zaman ($t$)** $\rightarrow$ **Güç ($P$)**
-- **Kütle ($m$)** $\times$ **Işık Hızı ($c$)** $\rightarrow$ **$E = mc^2$**
-- **Elektrik Akımı ($I$)** $\times$ **Zaman ($t$)** $\rightarrow$ **Elektrik Yükü ($q$)**
-- **Gerilim ($V$)** $\div$ **Akım ($I$)** $\rightarrow$ **Direnç ($R$)** *(Ohm Kanunu)*
+Proje Vercel için tam optimize edilmiştir (`vercel.json` ve `package.json` hazırdır).
+
+### 1. Vercel CLI ile Anında Dağıtım:
+Terminalde proje dizinindeyken:
+```bash
+npx vercel
+```
+*(İlk seferde Vercel hesabınıza giriş yapmanızı isteyecektir. Tüm soruları varsayılan olarak `Enter` ile geçebilirsiniz).*
+
+Canlıya almak için:
+```bash
+npx vercel --prod
+```
+
+### 2. GitHub Üzerinden Vercel Dağıtımı:
+1. GitHub'da yeni bir repo oluşturun (örn: `fizik-simyasi`).
+2. Terminalden yerel reponuzu bağlayıp pushlayın:
+   ```bash
+   git remote add origin https://github.com/KULLANICI_ADINIZ/fizik-simyasi.git
+   git push -u origin main
+   ```
+3. [vercel.com](https://vercel.com) adresine gidin, **"Add New Project"** diyerek GitHub reponuzu seçin ve **Deploy** butonuna basın. Birkaç saniye içinde global CDN üzerinden siteniz yayına girecektir!
