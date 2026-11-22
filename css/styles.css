@@ -32,6 +32,14 @@ body {
   background-color: var(--bg-deep);
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Restrict unselectable behavior specifically to the interactive canvas workspace and draggable pills */
+.canvas-blueprint-grid,
+.draggable-token,
+.sidebar-quantity-item,
+.token-chip,
+.connection-beam {
   user-select: none;
   -webkit-user-select: none;
 }
@@ -497,4 +505,62 @@ body {
 }
 .sidebar-quantity-item:active {
   cursor: grabbing;
+}
+
+/* ================= AI CHAT & MATH TYPOGRAPHY OVERHAUL ================= */
+
+/* Allow smooth and complete text selection across chat elements */
+#aiAssistantDrawer,
+#aiChatFeed,
+.chat-msg-card,
+.ai-formatted-content,
+.katex,
+.katex-display,
+.formula-node-body,
+.formula-ai-content,
+#wikiContent,
+#aiUserInput {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* Beautiful formula math block inside chat */
+.ai-math-display {
+  background: rgba(11, 16, 29, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  text-align: center;
+  overflow-x: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  color: #38bdf8;
+}
+
+.ai-math-display .katex-display {
+  margin: 0 !important;
+}
+
+.ai-math-inline {
+  display: inline-block;
+  padding: 0 0.2rem;
+  vertical-align: baseline;
+  color: #38bdf8;
+}
+
+/* Copy Button Styling */
+.copy-msg-btn {
+  cursor: pointer;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: all 0.15s ease;
+}
+
+.copy-msg-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.copy-msg-btn:active {
+  transform: scale(0.95);
 }

@@ -53,6 +53,32 @@ class AIAssistant {
       scalarInfoBtn.addEventListener('click', () => this.explainScalarVsVector());
     }
 
+    const quantumBtn = document.getElementById('aiQuantumBtn');
+    if (quantumBtn) {
+      quantumBtn.addEventListener('click', () => {
+        this.handleUserPrompt("Enerji ve momentum korunumu ile doğadaki simetriler (Noether teoremi) arasındaki ilişkiyi açıklar mısın?");
+      });
+    }
+
+    const clearChatBtn = document.getElementById('clearChatHistoryBtn');
+    if (clearChatBtn) {
+      clearChatBtn.addEventListener('click', () => {
+        this.chatHistory = [];
+        this.feed.innerHTML = `
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-slate-300 space-y-2.5 leading-relaxed shadow-sm select-text">
+            <p class="font-bold text-white flex items-center gap-1.5 text-xs">
+              <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i> LazalBot Fizik Laboratuvarı Sezgi Motoru
+            </p>
+            <p class="text-xs text-slate-300">Sohbet sıfırlandı. Masadaki büyüklükleri veya formülleri birleştirerek yeni bağıntılar üretebilir veya doğrudan sorularını sorabilirsin.</p>
+            <p class="text-[11px] text-slate-400 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
+              💡 Herhangi bir formülün üzerindeki <strong>"Fizik Sezgisi"</strong> butonuna basarak <strong>LazalBot</strong>'un derin boyut analizini, evren analojilerini ve sınır durum yorumlarını canlı olarak alabilirsin.
+            </p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons({ root: this.feed });
+      });
+    }
+
     // API Key Modal Handlers
     const openSettingsBtn = document.getElementById('openAiSettingsBtn');
     const settingsModal = document.getElementById('aiSettingsModal');
@@ -108,28 +134,92 @@ class AIAssistant {
     }
   }
 
-  appendCard(sender, htmlContent) {
+  appendCard(sender, content, rawText = null) {
     if (!this.feed) return;
 
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const card = document.createElement('div');
+    card.className = 'chat-msg-card transition-all duration-200 select-text';
+
     if (sender === 'user') {
-      card.className = 'bg-cyan-950/70 border border-cyan-800/80 rounded-xl p-3 text-cyan-200 text-xs ml-4 shadow-sm';
-      card.innerHTML = `<div class="font-bold text-[10px] text-cyan-400 uppercase tracking-wider mb-1">SEN:</div><div class="leading-relaxed">${htmlContent}</div>`;
+      const cleanText = (typeof content === 'string') ? content : '';
+      card.innerHTML = `
+        <div class="bg-gradient-to-r from-slate-900 to-cyan-950/70 border border-cyan-500/30 rounded-2xl rounded-tr-sm p-3.5 text-cyan-100 text-xs ml-4 shadow-sm select-text">
+          <div class="flex items-center justify-between border-b border-cyan-800/40 pb-1.5 mb-2">
+            <span class="font-bold text-[10px] text-cyan-400 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="user" class="w-3 h-3"></i> Sen
+            </span>
+            <span class="text-[10px] text-cyan-400/60 font-mono">${timeStr}</span>
+          </div>
+          <div class="leading-relaxed whitespace-pre-wrap text-slate-100 select-text">${this.escapeHtml(cleanText)}</div>
+        </div>
+      `;
     } else {
-      card.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-slate-300 text-xs space-y-2 leading-relaxed shadow-sm';
-      card.innerHTML = htmlContent;
+      const isAlreadyHtml = typeof content === 'string' && (content.startsWith('<div') || content.startsWith('<p') || content.includes('border-'));
+      const formattedHtml = isAlreadyHtml
+        ? content
+        : (typeof window.renderPhysicsMarkdown === 'function' ? window.renderPhysicsMarkdown(content) : content);
+
+      const textToCopy = rawText || content;
+
+      card.innerHTML = `
+        <div class="bg-slate-900/95 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-slate-200 text-xs space-y-2.5 leading-relaxed shadow-md select-text">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded-md bg-purple-950 border border-purple-600/50 flex items-center justify-center text-purple-400">
+                <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+              </div>
+              <span class="font-bold text-xs text-white">LazalBot</span>
+              <span class="text-[9px] text-emerald-400 font-mono bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-800/40">Fizik</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500 font-mono">${timeStr}</span>
+              <button class="copy-msg-btn flex items-center gap-1 text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800/80 hover:bg-slate-700 transition active:scale-95 border border-slate-700/50" title="Cevabı Kopyala">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                <span>Kopyala</span>
+              </button>
+            </div>
+          </div>
+          <div class="ai-formatted-content leading-relaxed space-y-2 text-slate-200 text-[13px] select-text">${formattedHtml}</div>
+        </div>
+      `;
+
+      const copyBtn = card.querySelector('.copy-msg-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(textToCopy);
+            copyBtn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span class="text-emerald-400 font-medium">Kopyalandı!</span>`;
+            if (window.lucide) lucide.createIcons({ root: copyBtn });
+            setTimeout(() => {
+              copyBtn.innerHTML = `<i data-lucide="copy" class="w-3 h-3"></i><span>Kopyala</span>`;
+              if (window.lucide) lucide.createIcons({ root: copyBtn });
+            }, 2000);
+          } catch (e) {
+            console.warn('Clipboard write error:', e);
+          }
+        });
+      }
     }
 
     this.feed.appendChild(card);
-    
+
     // Auto scroll strictly to the bottom
     requestAnimationFrame(() => {
       this.feed.scrollTop = this.feed.scrollHeight;
     });
 
-    // Render KaTeX for any math blocks inside the card
-    this.renderMathInCard(card);
-    lucide.createIcons();
+    if (window.lucide) {
+      lucide.createIcons({ root: card });
+    }
+  }
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   renderMathInCard(container) {
@@ -152,17 +242,36 @@ class AIAssistant {
 
   async explainFormulaDeeply(formula) {
     const cardId = 'formula-deep-' + Date.now();
-    const html = `
-      <div id="${cardId}" class="space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">${formula.category}</span>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">${formula.badge}</span>
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const card = document.createElement('div');
+    card.className = 'chat-msg-card transition-all duration-200 select-text';
+    card.innerHTML = `
+      <div id="${cardId}" class="bg-slate-900/95 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-slate-200 text-xs space-y-3 leading-relaxed shadow-md select-text">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">${formula.category}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">${formula.badge}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-500 font-mono">${timeStr}</span>
+            <button class="copy-msg-btn flex items-center gap-1 text-[10px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800/80 hover:bg-slate-700 transition active:scale-95 border border-slate-700/50" title="Analizi Kopyala">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              <span>Kopyala</span>
+            </button>
+          </div>
         </div>
-        <h3 class="text-sm font-bold text-white">${formula.title}</h3>
-        <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-serif text-emerald-300 text-center text-base formula-deep-display"></div>
-        <div class="bg-slate-950 p-2 rounded border border-slate-800 text-[11px] flex items-center justify-between">
-          <span class="text-slate-400 font-semibold">Boyut Analizi:</span>
-          <span class="font-mono text-cyan-400">${formula.dimensional || 'Standart SI'}</span>
+
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+          <span>${formula.title}</span>
+        </h3>
+
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center font-serif text-emerald-300 text-base formula-deep-display"></div>
+
+        <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/90 text-xs flex items-center justify-between">
+          <span class="text-slate-400 font-medium">Boyut Analizi:</span>
+          <span class="font-mono text-cyan-400 font-semibold">${formula.dimensional || 'Standart SI'}</span>
         </div>
         
         <div class="formula-ai-response-box bg-purple-950/20 border border-purple-500/30 rounded-xl p-3 text-xs space-y-2">
@@ -170,7 +279,7 @@ class AIAssistant {
             <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
             <span>LazalBot Fizik Sezgisi & Derin Analiz</span>
           </div>
-          <div class="formula-ai-content text-slate-300 leading-relaxed space-y-2">
+          <div class="formula-ai-content text-slate-200 leading-relaxed space-y-2 text-[13px] select-text">
             <div class="flex items-center gap-2 text-purple-400 py-1">
               <div class="w-3.5 h-3.5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
               <span>LazalBot teoriyi ve evrendeki derin anlamını inceliyor...</span>
@@ -180,7 +289,7 @@ class AIAssistant {
       </div>
     `;
 
-    this.appendCard('assistant', html);
+    this.feed.appendChild(card);
 
     const cardEl = document.getElementById(cardId);
     if (cardEl) {
@@ -226,15 +335,15 @@ Görevin:
 
     if (cardEl) {
       const contentEl = cardEl.querySelector('.formula-ai-content');
+      const copyBtn = cardEl.querySelector('.copy-msg-btn');
+
       if (contentEl) {
         if (replyText) {
-          let formatted = replyText
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n\n/g, '<br><br>')
-            .replace(/\n/g, '<br>');
+          const formatted = typeof window.renderPhysicsMarkdown === 'function'
+            ? window.renderPhysicsMarkdown(replyText)
+            : replyText;
 
-          contentEl.innerHTML = `<div class="ai-text leading-relaxed text-slate-200">${formatted}</div>`;
-          this.renderLatexInContainer(contentEl);
+          contentEl.innerHTML = `<div class="ai-text leading-relaxed text-slate-200 select-text">${formatted}</div>`;
 
           // Add to chat history so user can follow up
           this.chatHistory.push({ role: 'user', parts: [{ text: userPrompt }] });
@@ -242,12 +351,29 @@ Görevin:
           if (this.chatHistory.length > 16) {
             this.chatHistory = this.chatHistory.slice(-16);
           }
+
+          if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+              try {
+                await navigator.clipboard.writeText(`${formula.title} (${formula.badge})\nFormül: ${formula.katex}\nBoyut: ${formula.dimensional}\n\nLazalBot Analizi:\n${replyText}`);
+                copyBtn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span class="text-emerald-400 font-medium">Kopyalandı!</span>`;
+                if (window.lucide) lucide.createIcons({ root: copyBtn });
+                setTimeout(() => {
+                  copyBtn.innerHTML = `<i data-lucide="copy" class="w-3 h-3"></i><span>Kopyala</span>`;
+                  if (window.lucide) lucide.createIcons({ root: copyBtn });
+                }, 2000);
+              } catch (e) {
+                console.warn('Clipboard write error:', e);
+              }
+            });
+          }
         } else {
           // Fallback to offline pre-written intuition
-          contentEl.innerHTML = `
-            <p class="text-slate-300 leading-relaxed">${formula.intuition || formula.description}</p>
-          `;
-          this.renderLatexInContainer(contentEl);
+          const fallbackText = formula.intuition || formula.description;
+          const formattedFallback = typeof window.renderPhysicsMarkdown === 'function'
+            ? window.renderPhysicsMarkdown(fallbackText)
+            : fallbackText;
+          contentEl.innerHTML = `<p class="text-slate-300 leading-relaxed select-text">${formattedFallback}</p>`;
         }
       }
     }
@@ -348,14 +474,7 @@ Görev ve Kuralların:
 
     if (replyText) {
       this.chatHistory.push({ role: 'model', parts: [{ text: replyText }] });
-
-      // Clean markdown bold and paragraphs
-      let formatted = replyText
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>');
-
-      this.appendCard('assistant', formatted);
+      this.appendCard('assistant', replyText, replyText);
     } else {
       this.respondOffline(userText);
     }
