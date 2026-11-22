@@ -1,12 +1,12 @@
 /**
- * Physics Alchemy - Comprehensive Database of Physical Quantities & Formulas
- * Skaler ve Vektörel büyüklükler, SI birimleri, sembolleri, formül bağıntıları ve zengin fiziksel sezgiler
+ * lazaloglucafizik - Gelişmiş Fiziksel Büyüklükler ve Formül Havuzu
+ * Mekanik, Kinematik, Termodinamik, Elektromanyetizma, Dalgalar, Optik ve Modern Fizik
  */
 
 const PHYSICS_DATA = {
   // 1. PHYSICAL QUANTITIES (BÜYÜKLÜKLER)
   quantities: [
-    // TEMEL BÜYÜKLÜKLER (Başlangıçta açık)
+    // TEMEL BÜYÜKLÜKLER (7 SI Temel Büyüklük + Temel Sabitler)
     {
       id: 'mass',
       name: 'Kütle',
@@ -132,13 +132,26 @@ const PHYSICS_DATA = {
       type: 'vector',
       dimension: '[L][T]⁻²',
       category: 'Mekanik',
-      description: 'Dünya yüzeyinde kütleçekim alanının serbest düşen cisimlere kazandırdığı vektörel ivmedir.',
+      description: 'Dünya yüzeyinde kütleçekim alanının serbest düşen cisimlere kazandırdığı ivmedir.',
       wikiQuery: 'Yerçekimi ivmesi',
       isDefaultUnlocked: true,
       icon: 'arrow-down'
     },
+    {
+      id: 'planck_constant',
+      name: 'Planck Sabiti',
+      symbol: 'h',
+      unit: '6.626×10⁻³⁴ J·s',
+      type: 'constant',
+      dimension: '[M][L]²[T]⁻¹',
+      category: 'Modern Fizik',
+      description: 'Kuantum mekaniğinde eylemin ve enerji paketçiklerinin temel ölçek sabitidir.',
+      wikiQuery: 'Planck sabiti',
+      isDefaultUnlocked: true,
+      icon: 'cpu'
+    },
 
-    // KİLİTLİ / TÜRETİLEBİLİR BÜYÜKLÜKLER
+    // TÜRETİLMİŞ BÜYÜKLÜKLER (Sentezlenerek Açılır)
     {
       id: 'speed',
       name: 'Sürat',
@@ -147,7 +160,7 @@ const PHYSICS_DATA = {
       type: 'scalar',
       dimension: '[L][T]⁻¹',
       category: 'Kinematik',
-      description: 'Birim zamanda alınan yol miktarıdır (Skaler).',
+      description: 'Birim zamanda kat edilen yol miktarıdır (Skaler).',
       wikiQuery: 'Sürat',
       isDefaultUnlocked: false,
       icon: 'gauge'
@@ -205,6 +218,19 @@ const PHYSICS_DATA = {
       icon: 'anchor'
     },
     {
+      id: 'spring_constant',
+      name: 'Yay Sabiti (Esneklik)',
+      symbol: 'k',
+      unit: 'N/m',
+      type: 'scalar',
+      dimension: '[M][T]⁻²',
+      category: 'Mekanik',
+      description: 'Yayın sertlik derecesini ve birim uzamaya karşı gösterdiği direnci ölçer.',
+      wikiQuery: 'Hooke yasası',
+      isDefaultUnlocked: false,
+      icon: 'git-commit'
+    },
+    {
       id: 'work_energy',
       name: 'İş / Enerji',
       symbol: 'W / E',
@@ -225,7 +251,7 @@ const PHYSICS_DATA = {
       type: 'scalar',
       dimension: '[M][L]²[T]⁻³',
       category: 'Enerji',
-      description: 'Birim zamanda harcanan enerji veya yapılan iş hızıdır (P = W / t). Skalerdir.',
+      description: 'Birim zamanda harcanan enerji veya yapılan iş hızıdır (P = W / t).',
       wikiQuery: 'Güç (fizik)',
       isDefaultUnlocked: false,
       icon: 'activity'
@@ -277,10 +303,36 @@ const PHYSICS_DATA = {
       type: 'scalar',
       dimension: '[M][L]⁻¹[T]⁻²',
       category: 'Akışkanlar',
-      description: 'Birim yüzeye dik düşen kuvvet yoğunluğudur. Skaler bir alandır.',
+      description: 'Birim yüzeye dik düşen kuvvet yoğunluğudur.',
       wikiQuery: 'Basınç',
       isDefaultUnlocked: false,
       icon: 'compass'
+    },
+    {
+      id: 'buoyant_force',
+      name: 'Kaldırma Kuvveti',
+      symbol: 'Fk',
+      unit: 'N (Newton)',
+      type: 'vector',
+      dimension: '[M][L][T]⁻²',
+      category: 'Akışkanlar',
+      description: 'Akışkanların batan cisimlere yukarı yönde uyguladığı net basınç kuvvetidir.',
+      wikiQuery: 'Arşimet prensibi',
+      isDefaultUnlocked: false,
+      icon: 'life-buoy'
+    },
+    {
+      id: 'flow_rate',
+      name: 'Hacimsel Debi',
+      symbol: 'Q_d',
+      unit: 'm³/s',
+      type: 'scalar',
+      dimension: '[L]³[T]⁻¹',
+      category: 'Akışkanlar',
+      description: 'Birim zamanda boru veya kanaldan akan sıvı hacmidir (Q = A·v).',
+      wikiQuery: 'Debi',
+      isDefaultUnlocked: false,
+      icon: 'wind'
     },
     {
       id: 'momentum',
@@ -303,10 +355,62 @@ const PHYSICS_DATA = {
       type: 'vector',
       dimension: '[M][L][T]⁻¹',
       category: 'Dinamik',
-      description: 'Bir kuvvetin etki ettiği süre boyunca cisme kazandırdığı momentum değişimidir.',
+      description: 'Kuvvetin etki süresiyle çarpımı sonucu oluşan momentum değişimidir.',
       wikiQuery: 'İtme',
       isDefaultUnlocked: false,
       icon: 'zap-off'
+    },
+    {
+      id: 'angular_velocity',
+      name: 'Açısal Hız',
+      symbol: 'ω⃗',
+      unit: 'rad/s',
+      type: 'vector',
+      dimension: '[T]⁻¹',
+      category: 'Dönme Mekaniği',
+      description: 'Dönen bir cismin birim zamanda süpürdüğü radyan cinsinden açıdır.',
+      wikiQuery: 'Açısal hız',
+      isDefaultUnlocked: false,
+      icon: 'rotate-cw'
+    },
+    {
+      id: 'moment_of_inertia',
+      name: 'Eylemsizlik Momenti',
+      symbol: 'I_m',
+      unit: 'kg·m²',
+      type: 'scalar',
+      dimension: '[M][L]²',
+      category: 'Dönme Mekaniği',
+      description: 'Cismin dönme hareketindeki açısal ivmeye karşı gösterdiği eylemsizlik direncidir.',
+      wikiQuery: 'Eylemsizlik momenti',
+      isDefaultUnlocked: false,
+      icon: 'disc'
+    },
+    {
+      id: 'angular_momentum',
+      name: 'Açısal Momentum',
+      symbol: 'L⃗',
+      unit: 'kg·m²/s',
+      type: 'vector',
+      dimension: '[M][L]²[T]⁻¹',
+      category: 'Dönme Mekaniği',
+      description: 'Dönme hareketinin büyüklüğünü belirleyen korunumlu vektörel niceliktir (L = I·ω).',
+      wikiQuery: 'Açısal momentum',
+      isDefaultUnlocked: false,
+      icon: 'circle-dot'
+    },
+    {
+      id: 'torque',
+      name: 'Tork (Dönme Momenti)',
+      symbol: 'τ⃗',
+      unit: 'N·m',
+      type: 'vector',
+      dimension: '[M][L]²[T]⁻²',
+      category: 'Mekanik',
+      description: 'Kuvvetin bir dönme eksenine göre döndürme kabiliyetini ölçen vektörel büyüklüktür.',
+      wikiQuery: 'Tork',
+      isDefaultUnlocked: false,
+      icon: 'rotate-cw'
     },
     {
       id: 'electric_charge',
@@ -322,8 +426,21 @@ const PHYSICS_DATA = {
       icon: 'disc'
     },
     {
+      id: 'electric_field',
+      name: 'Elektrik Alanı',
+      symbol: 'E⃗',
+      unit: 'N/C (V/m)',
+      type: 'vector',
+      dimension: '[M][L][T]⁻³[I]⁻¹',
+      category: 'Elektromanyetizma',
+      description: 'Birim pozitif yüke etki eden elektriksel kuvvet alanıdır (E = F / q).',
+      wikiQuery: 'Elektrik alanı',
+      isDefaultUnlocked: false,
+      icon: 'sparkle'
+    },
+    {
       id: 'voltage',
-      name: 'Gerilim (Volt)',
+      name: 'Gerilim (Potansiyel Fark)',
       symbol: 'V',
       unit: 'V (Volt)',
       type: 'scalar',
@@ -346,6 +463,45 @@ const PHYSICS_DATA = {
       wikiQuery: 'Elektriksel direnç',
       isDefaultUnlocked: false,
       icon: 'sliders'
+    },
+    {
+      id: 'capacitance',
+      name: 'Sığa (Kapasite)',
+      symbol: 'C',
+      unit: 'F (Farad)',
+      type: 'scalar',
+      dimension: '[M]⁻¹[L]⁻²[T]⁴[I]²',
+      category: 'Elektromanyetizma',
+      description: 'Kondansatörün elektrik yükü depolama kabiliyetidir (C = q / V).',
+      wikiQuery: 'Kapasitans',
+      isDefaultUnlocked: false,
+      icon: 'database'
+    },
+    {
+      id: 'magnetic_field',
+      name: 'Manyetik Alan',
+      symbol: 'B⃗',
+      unit: 'T (Tesla)',
+      type: 'vector',
+      dimension: '[M][T]⁻²[I]⁻¹',
+      category: 'Elektromanyetizma',
+      description: 'Hareketli yüklere ve akımlara dik kuvvet uygulayan vektörel alandır.',
+      wikiQuery: 'Manyetik alan',
+      isDefaultUnlocked: false,
+      icon: 'magnet'
+    },
+    {
+      id: 'magnetic_flux',
+      name: 'Manyetik Akı',
+      symbol: 'Φ_B',
+      unit: 'Wb (Weber)',
+      type: 'scalar',
+      dimension: '[M][L]²[T]⁻²[I]⁻¹',
+      category: 'Elektromanyetizma',
+      description: 'Belirli bir yüzeyden dik geçen toplam manyetik alan çizgi sayısıdır (Φ = B·A).',
+      wikiQuery: 'Manyetik akı',
+      isDefaultUnlocked: false,
+      icon: 'grid'
     },
     {
       id: 'kinetic_energy',
@@ -387,19 +543,6 @@ const PHYSICS_DATA = {
       icon: 'atom'
     },
     {
-      id: 'torque',
-      name: 'Tork (Dönme Momenti)',
-      symbol: 'τ⃗',
-      unit: 'N·m',
-      type: 'vector',
-      dimension: '[M][L]²[T]⁻²',
-      category: 'Mekanik',
-      description: 'Kuvvetin bir dönme eksenine göre döndürme kabiliyetini ölçen vektörel büyüklüktür.',
-      wikiQuery: 'Tork',
-      isDefaultUnlocked: false,
-      icon: 'rotate-cw'
-    },
-    {
       id: 'frequency',
       name: 'Frekans',
       symbol: 'f',
@@ -439,6 +582,19 @@ const PHYSICS_DATA = {
       icon: 'box'
     },
     {
+      id: 'luminous_flux',
+      name: 'Işık Akısı',
+      symbol: 'Φ_v',
+      unit: 'lm (Lümen)',
+      type: 'scalar',
+      dimension: '[J]',
+      category: 'Optik',
+      description: 'Bir kaynaktan birim zamanda yayılan toplam görünür ışık enerjisidir.',
+      wikiQuery: 'Işık akısı',
+      isDefaultUnlocked: false,
+      icon: 'sun'
+    },
+    {
       id: 'illuminance',
       name: 'Aydınlanma Şiddeti',
       symbol: 'E_a',
@@ -450,15 +606,29 @@ const PHYSICS_DATA = {
       wikiQuery: 'Aydınlanma şiddeti',
       isDefaultUnlocked: false,
       icon: 'sun-medium'
+    },
+    {
+      id: 'refractive_index',
+      name: 'Kırılma İndisi',
+      symbol: 'n_k',
+      unit: 'Boyutsuz',
+      type: 'scalar',
+      dimension: '[1]',
+      category: 'Optik',
+      description: 'Işığın boşluktaki hızının o ortamdaki yayılma hızına oranıdır (n = c / v).',
+      wikiQuery: 'Kırılma indisi',
+      isDefaultUnlocked: false,
+      icon: 'glasses'
     }
   ],
 
-  // 2. FORMULAS & COMBINATIONS (Reçeteler ve Karşılıklı Eşleşmeler)
+  // 2. FORMULAS & COMBINATIONS (GENİŞ FORMÜL HAVUZU)
   formulas: [
+    // --- KİNEMATİK & HAREKET ---
     {
       id: 'speed_formula',
       inputs: ['distance', 'time'],
-      operation: 'divide', // distance / time
+      operation: 'divide',
       resultQuantityId: 'speed',
       title: 'Sürat Tanımı',
       katex: 'v = \\frac{x}{t}',
@@ -466,13 +636,13 @@ const PHYSICS_DATA = {
       category: 'Kinematik',
       description: 'Alınan skaler yolun geçen süreye oranı sürati verir.',
       wikiQuery: 'Sürat',
-      intuition: 'Kilometre sayacınızın gösterdiği değer sürattir. Hangi yöne gittiğinizle ilgilenmez, sadece birim zamanda ne kadar yol tükettiğinizi söyler.',
+      intuition: 'Kilometre sayacınızın gösterdiği değer sürattir. Yönsüzdür.',
       dimensional: '[L] / [T] = [L][T]⁻¹ (m/s)'
     },
     {
       id: 'velocity_formula',
       inputs: ['displacement', 'time'],
-      operation: 'divide', // displacement / time
+      operation: 'divide',
       resultQuantityId: 'velocity',
       title: 'Hız Vektörü Tanımı',
       katex: '\\vec{v} = \\frac{\\Delta\\vec{x}}{\\Delta t}',
@@ -480,14 +650,14 @@ const PHYSICS_DATA = {
       category: 'Kinematik',
       description: 'Konumdaki yönlü yer değiştirmenin geçen zamana oranı hız vektörüdür.',
       wikiQuery: 'Hız',
-      intuition: 'Hız, süratin aksine yön içerir. "Kuzeye doğru 90 km/s hız" bir hız vektörüdür.',
+      intuition: 'Hız, süratin aksine kesin bir yön ve doğrultu içerir.',
       dimensional: '[L] / [T] = [L][T]⁻¹ (m/s)'
     },
     {
       id: 'acceleration_formula',
       inputs: ['velocity', 'time'],
       fallbackInputs: ['speed', 'time'],
-      operation: 'divide', // v / t
+      operation: 'divide',
       resultQuantityId: 'acceleration',
       title: 'İvme Tanımı',
       katex: '\\vec{a} = \\frac{\\Delta\\vec{v}}{\\Delta t}',
@@ -495,9 +665,41 @@ const PHYSICS_DATA = {
       category: 'Kinematik',
       description: 'Hız vektörünün birim zamandaki değişim hızıdır.',
       wikiQuery: 'İvme',
-      intuition: 'Arabanın gaz pedalına (hızlanma) ya da frenine (yavaşlama) bastığınızda ivmelenirsiniz. Hatta sabit süratle viraj alırken yön değiştiği için yine ivmelenirsiniz!',
+      intuition: 'Gaza veya frene basıldığında ya da viraj dönüldüğünde ivme oluşur.',
       dimensional: '[L][T]⁻¹ / [T] = [L][T]⁻² (m/s²)'
     },
+    {
+      id: 'angular_velocity_formula',
+      inputs: ['speed', 'distance'],
+      fallbackInputs: ['velocity', 'distance'],
+      operation: 'divide',
+      resultQuantityId: 'angular_velocity',
+      title: 'Çizgisel ve Açısal Hız Bağıntısı',
+      katex: '\\omega = \\frac{v}{r} \\iff v = \\omega \\cdot r',
+      badge: 'Skaler / Skaler = Vektörel Açı',
+      category: 'Dönme Mekaniği',
+      description: 'Yarıçap mesafesiyle çizgisel hızın oranı dönme açısal hızını verir.',
+      wikiQuery: 'Açısal hız',
+      intuition: 'Dönme dolabın dış kenarındaki koltuk daha hızlı gider, ancak merkezle aynı açısal hızda döner.',
+      dimensional: '[L][T]⁻¹ / [L] = [T]⁻¹ (rad/s)'
+    },
+    {
+      id: 'centripetal_accel_formula',
+      inputs: ['angular_velocity', 'speed'],
+      fallbackInputs: ['angular_velocity', 'velocity'],
+      operation: 'multiply',
+      resultQuantityId: 'acceleration',
+      title: 'Merkezcil İvme',
+      katex: 'a_c = \\omega \\cdot v = \\frac{v^2}{r}',
+      badge: 'Açısal × Çizgisel = İvme',
+      category: 'Dönme Mekaniği',
+      description: 'Dairesel yörüngede dönen cismi merkeze doğru çeken ivmedir.',
+      wikiQuery: 'Merkezcil kuvvet',
+      intuition: 'Virajı dönerken savrulmanızı engelleyip yolda tutan ivme vektörüdür.',
+      dimensional: '[T]⁻¹ · [L][T]⁻¹ = [L][T]⁻² (m/s²)'
+    },
+
+    // --- DİNAMİK & NEWTON YASALARI ---
     {
       id: 'newton_second_law',
       inputs: ['mass', 'acceleration'],
@@ -509,7 +711,7 @@ const PHYSICS_DATA = {
       category: 'Dinamik',
       description: 'Cisme uygulanan net kuvvet, kütlesi ile kazandığı ivmenin çarpımıdır.',
       wikiQuery: "Newton'un hareket yasaları",
-      intuition: 'Klasik fiziğin en büyük sütunudur. Bir nesneye ivme kazandırmak istiyorsanız kuvvet uygulamalısınız; nesne ne kadar ağırsa (kütle), aynı ivmeyi vermek için o kadar fazla kuvvet gerekir.',
+      intuition: 'Bir cisme ivme kazandırmak için kuvvet gerekir; kütle arttıkça gereken kuvvet artar.',
       dimensional: '[M] · [L][T]⁻² = [M][L][T]⁻² (Newton, N)'
     },
     {
@@ -523,9 +725,55 @@ const PHYSICS_DATA = {
       category: 'Dinamik',
       description: 'Dünya veya bir gök cisminin bir kütleye uyguladığı kütleçekim kuvvetidir.',
       wikiQuery: 'Ağırlık',
-      intuition: 'Kütleniz Ay’da da Dünya’da da aynıdır (70 kg). Ancak Ay’daki yerçekimi ivmesi g daha küçük olduğu için ağırlığınız orada altıda bire düşer.',
+      intuition: 'Kütleniz uzayda sabittir, ancak ağırlık bulunulan ortamın g ivmesine göre değişir.',
       dimensional: '[M] · [L][T]⁻² = [M][L][T]⁻² (Newton)'
     },
+    {
+      id: 'hookes_law',
+      inputs: ['force', 'distance'],
+      fallbackInputs: ['force', 'displacement'],
+      operation: 'divide',
+      resultQuantityId: 'spring_constant',
+      title: 'Hooke Kanunu (Yay Sabiti)',
+      katex: 'k = \\frac{F}{x} \\iff \\vec{F} = -k \\cdot \\vec{x}',
+      badge: 'Kuvvet / Mesafe = Yay Sabiti',
+      category: 'Mekanik',
+      description: 'Esnek bir cismin geri çağırıcı kuvveti uzama/sıkışma miktarıyla doğru orantılıdır.',
+      wikiQuery: 'Hooke yasası',
+      intuition: 'Yayı ne kadar çok gererseniz o kadar büyük kuvvetle geri çeker.',
+      dimensional: '[M][L][T]⁻² / [L] = [M][T]⁻² (N/m)'
+    },
+    {
+      id: 'momentum_formula',
+      inputs: ['mass', 'velocity'],
+      fallbackInputs: ['mass', 'speed'],
+      operation: 'multiply',
+      resultQuantityId: 'momentum',
+      title: 'Çizgisel Momentum',
+      katex: '\\vec{p} = m \\cdot \\vec{v}',
+      badge: 'Skaler × Vektör = Vektör',
+      category: 'Dinamik',
+      description: 'Hareket miktarıdır. Bir cismin hızını ve durdurulma direncini belirler.',
+      wikiQuery: 'Momentum',
+      intuition: 'Ağır bir kamyon ve hızlı bir mermiyi durdurmak momentuma bağlı olarak çok zordur.',
+      dimensional: '[M] · [L][T]⁻¹ = [M][L][T]⁻¹ (kg·m/s)'
+    },
+    {
+      id: 'impulse_formula',
+      inputs: ['force', 'time'],
+      operation: 'multiply',
+      resultQuantityId: 'impulse',
+      title: 'İtme (İmpuls) ve Momentum Değişimi',
+      katex: '\\vec{I} = \\vec{F} \\cdot \\Delta t = \\Delta\\vec{p}',
+      badge: 'Vektör × Skaler = Vektör',
+      category: 'Dinamik',
+      description: 'Kuvvetin etki süresiyle çarpımı momentumdaki net değişimi üretir.',
+      wikiQuery: 'İtme',
+      intuition: 'Hava yastığı çarpışma süresini uzatarak vücuda binen darbe kuvvetini azaltır.',
+      dimensional: '[M][L][T]⁻² · [T] = [M][L][T]⁻¹ (N·s)'
+    },
+
+    // --- GEOMETRİ & AKIŞKANLAR ---
     {
       id: 'area_formula',
       inputs: ['distance', 'distance'],
@@ -537,7 +785,7 @@ const PHYSICS_DATA = {
       category: 'Geometri',
       description: 'İki doğrusal boyutun çarpımı yüzey alanını oluşturur.',
       wikiQuery: 'Alan (geometri)',
-      intuition: 'Bir tarlanın eni ile boyunu çarpmak gibi. Uzamsal boyutu 1D’den 2D’ye taşır.',
+      intuition: 'Tarlanın eni ile boyunun çarpımı 2D yüzeyi tanımlar.',
       dimensional: '[L] · [L] = [L]² (m²)'
     },
     {
@@ -551,7 +799,7 @@ const PHYSICS_DATA = {
       category: 'Geometri',
       description: 'Yüzey alanı ile derinliğin çarpımı üç boyutlu uzayı tanımlar.',
       wikiQuery: 'Hacim',
-      intuition: 'Taban alanı belli bir bardağa su doldurdukça suyun yüksekliğiyle hacim oluşur (3D uzay).',
+      intuition: 'Taban alanı ile yüksekliğin çarpımı 3D uzay hacmini verir.',
       dimensional: '[L]² · [L] = [L]³ (m³)'
     },
     {
@@ -565,9 +813,69 @@ const PHYSICS_DATA = {
       category: 'Madde',
       description: 'Birim hacme sığan kütle miktarıdır.',
       wikiQuery: 'Özkütle',
-      intuition: 'Demirin suda batıp tahtanın yüzmesi özkütle farkıdır. Atomların birbirine ne kadar sıkı istiflendiğini söyler.',
+      intuition: 'Demirin suda batıp tahtanın yüzmesi atomların istif yoğunluğu farkıdır.',
       dimensional: '[M] / [L]³ = [M][L]⁻³ (kg/m³)'
     },
+    {
+      id: 'pressure_formula',
+      inputs: ['force', 'area'],
+      operation: 'divide',
+      resultQuantityId: 'pressure',
+      title: 'Basınç İlkesi',
+      katex: 'P = \\frac{F}{A}',
+      badge: 'Vektör / Skaler = Skaler Alan',
+      category: 'Akışkanlar',
+      description: 'Birim yüzeye dik uygulanan kuvvet yoğunluğudur.',
+      wikiQuery: 'Basınç',
+      intuition: 'Topuklu ayakkabının kara batıp kar ayakkabısının batmaması alanın basınca etkisidir.',
+      dimensional: '[M][L][T]⁻² / [L]² = [M][L]⁻¹[T]⁻² (Pascal, Pa)'
+    },
+    {
+      id: 'fluid_pressure_formula',
+      inputs: ['density', 'distance'],
+      fallbackInputs: ['density', 'displacement'],
+      operation: 'multiply',
+      resultQuantityId: 'pressure',
+      title: 'Durgun Sıvı Basıncı',
+      katex: 'P = \\rho \\cdot g \\cdot h',
+      badge: 'Özkütle × Derinlik = Sıvı Basıncı',
+      category: 'Akışkanlar',
+      description: 'Sıvı sütununun tabana uyguladığı hidrostatik basınçtır.',
+      wikiQuery: 'Basınç',
+      intuition: 'Denizde derine daldıkça kulaklarınızdaki baskının artması sıvı basıncıdır.',
+      dimensional: '[M][L]⁻³ · [L] ➔ [M][L]⁻¹[T]⁻² (Pascal)'
+    },
+    {
+      id: 'buoyant_force_formula',
+      inputs: ['density', 'volume'],
+      operation: 'multiply',
+      resultQuantityId: 'buoyant_force',
+      title: 'Arşimet Kaldırma Kuvveti',
+      katex: 'F_k = V_{batan} \\cdot \\rho_{sıvı} \\cdot g',
+      badge: 'Özkütle × Hacim = Kaldırma Kuvveti',
+      category: 'Akışkanlar',
+      description: 'Batan cismin yerini değiştirdiği sıvının ağırlığına eşit yukarı kuvvet doğar.',
+      wikiQuery: 'Arşimet prensibi',
+      intuition: 'Devasa çelik gemilerin batmadan yüzebilmesi yerini değiştirdikleri suyun ağırlığı sayesindedir.',
+      dimensional: '[M][L]⁻³ · [L]³ ➔ [M][L][T]⁻² (Newton)'
+    },
+    {
+      id: 'flow_rate_formula',
+      inputs: ['area', 'speed'],
+      fallbackInputs: ['area', 'velocity'],
+      operation: 'multiply',
+      resultQuantityId: 'flow_rate',
+      title: 'Süreklilik Denklemi (Debi)',
+      katex: 'Q = A \\cdot v = \\frac{V}{t}',
+      badge: 'Alan × Hız = Debi',
+      category: 'Akışkanlar',
+      description: 'Boru kesiti ile akışkan hızının çarpımı sabittir. Kesit daralınca hız artar.',
+      wikiQuery: 'Debi',
+      intuition: 'Bahçe hortumunun ucunu parmağınızla sıktığınızda suyun fışkırarak hızlanmasıdır.',
+      dimensional: '[L]² · [L][T]⁻¹ = [L]³[T]⁻¹ (m³/s)'
+    },
+
+    // --- İŞ, GÜÇ & ENERJİ ---
     {
       id: 'work_formula',
       inputs: ['force', 'distance'],
@@ -580,7 +888,7 @@ const PHYSICS_DATA = {
       category: 'Enerji',
       description: 'Kuvvetin doğrultusunda yer değiştirme yaptırması ile cisme enerji aktarılır.',
       wikiQuery: 'İş (fizik)',
-      intuition: 'Çok ağır bir duvarı saatlerce itin; duvar kımıldamadığı sürece fizikte sıfır iş yapmış sayılırsınız! İş için mutlaka kuvvet doğrultusunda yer değiştirme şarttır.',
+      intuition: 'Kuvvet doğrultusunda hareket yoksa fiziksel olarak iş yapılmış sayılmaz.',
       dimensional: '[M][L][T]⁻² · [L] = [M][L]²[T]⁻² (Joule, J)'
     },
     {
@@ -594,7 +902,7 @@ const PHYSICS_DATA = {
       category: 'Enerji',
       description: 'Birim zamanda yapılan iş veya dönüştürülen enerjidir.',
       wikiQuery: 'Güç (fizik)',
-      intuition: '1000 Joule işi 100 saniyede yapmak 10 Watt güç ister. Aynı işi 1 saniyede yaparsanız 1000 Watt (1 kW) güç üretmiş olursunuz.',
+      intuition: 'Aynı işi daha kısa sürede yapan motor daha güçlüdür (Watt = J/s).',
       dimensional: '[M][L]²[T]⁻² / [T] = [M][L]²[T]⁻³ (Watt, W)'
     },
     {
@@ -609,65 +917,8 @@ const PHYSICS_DATA = {
       category: 'Enerji',
       description: 'Cisme uygulanan kuvvet ile anlık hızın skaler çarpımı anlık gücü verir.',
       wikiQuery: 'Güç (fizik)',
-      intuition: 'Yüksek hızda rüzgar direncine karşı aynı kuvveti uygulamak araba motorundan çok daha yüksek güç talep eder.',
+      intuition: 'Yüksek hızda arabayı sabit tutmak için motorun anlık yüksek güç üretmesi gerekir.',
       dimensional: '[M][L][T]⁻² · [L][T]⁻¹ = [M][L]²[T]⁻³ (Watt)'
-    },
-    {
-      id: 'pressure_formula',
-      inputs: ['force', 'area'],
-      operation: 'divide',
-      resultQuantityId: 'pressure',
-      title: 'Basınç İlkesi',
-      katex: 'P = \\frac{F}{A}',
-      badge: 'Vektör / Skaler = Skaler Alan',
-      category: 'Akışkanlar',
-      description: 'Birim yüzeye dik uygulanan kuvvet yoğunluğudur.',
-      wikiQuery: 'Basınç',
-      intuition: 'Topuklu ayakkabının kara batıp kar ayakkabısının batmaması alanın (A) basıncı devasa değiştirmesidir.',
-      dimensional: '[M][L][T]⁻² / [L]² = [M][L]⁻¹[T]⁻² (Pascal, Pa)'
-    },
-    {
-      id: 'momentum_formula',
-      inputs: ['mass', 'velocity'],
-      fallbackInputs: ['mass', 'speed'],
-      operation: 'multiply',
-      resultQuantityId: 'momentum',
-      title: 'Çizgisel Momentum',
-      katex: '\\vec{p} = m \\cdot \\vec{v}',
-      badge: 'Skaler × Vektör = Vektör',
-      category: 'Dinamik',
-      description: 'Hareket miktarıdır. Bir cismin hızını ve durdurulma direncini belirler.',
-      wikiQuery: 'Momentum',
-      intuition: 'Yavaş giden bir yük gemisiyle hızlı uçan bir merminin her ikisi de devasa momentuma sahiptir; durdurmak inanılmaz zordur.',
-      dimensional: '[M] · [L][T]⁻¹ = [M][L][T]⁻¹ (kg·m/s)'
-    },
-    {
-      id: 'impulse_formula',
-      inputs: ['force', 'time'],
-      operation: 'multiply',
-      resultQuantityId: 'impulse',
-      title: 'İtme (İmpuls) ve Momentum Değişimi',
-      katex: '\\vec{I} = \\vec{F} \\cdot \\Delta t = \\Delta\\vec{p}',
-      badge: 'Vektör × Skaler = Vektör',
-      category: 'Dinamik',
-      description: 'Kuvvetin etki süresiyle çarpımı momentumdaki net değişimi üretir.',
-      wikiQuery: 'İtme',
-      intuition: 'Araçlardaki hava yastıkları çarpışma süresini (t) uzatarak vücudunuza binen darbe kuvvetini (F) ölümcül seviyenin altına çeker.',
-      dimensional: '[M][L][T]⁻² · [T] = [M][L][T]⁻¹ (N·s)'
-    },
-    {
-      id: 'potential_energy_formula',
-      inputs: ['weight', 'distance'],
-      operation: 'multiply',
-      resultQuantityId: 'potential_energy',
-      title: 'Yerçekimsel Potansiyel Enerji',
-      katex: 'E_p = G \\cdot h = m \\cdot g \\cdot h',
-      badge: 'Vektör × Skaler = Skaler',
-      category: 'Enerji',
-      description: 'Yerçekimine karşı yüksekliğe taşınan cisimde depolanan enerjidir.',
-      wikiQuery: 'Potansiyel enerji',
-      intuition: 'Baraj göllerinde toplanan su bu potansiyel enerjiyi saklar; kapaklar açılınca elektrik enerjisine dönüşür.',
-      dimensional: '[M][L]²[T]⁻² (Joule)'
     },
     {
       id: 'kinetic_energy_formula',
@@ -681,64 +932,66 @@ const PHYSICS_DATA = {
       category: 'Enerji',
       description: 'Hareket halindeki kütlenin hızından kaynaklanan iş yapabilme kabiliyetidir.',
       wikiQuery: 'Kinetik enerji',
-      intuition: 'Hız iki katına çıktığında kinetik enerji dört katına fırlar! Bu yüzden 100 km/s hızdaki bir kaza 50 km/s hızdakinin iki katı değil dört katı tahribat yaratır.',
+      intuition: 'Hız 2 katına çıkınca fren mesafesi ve kinetik enerji 4 katına fırlar.',
       dimensional: '[M][L]²[T]⁻² (Joule)'
     },
     {
-      id: 'charge_formula',
-      inputs: ['current', 'time'],
+      id: 'potential_energy_formula',
+      inputs: ['weight', 'distance'],
       operation: 'multiply',
-      resultQuantityId: 'electric_charge',
-      title: 'Elektrik Yükü Korunumu',
-      katex: 'q = I \\cdot t',
-      badge: 'Skaler × Skaler = Skaler',
-      category: 'Elektromanyetizma',
-      description: 'İletkenden geçen toplam yük, akım ile sürenin çarpımıdır.',
-      wikiQuery: 'Elektrik yükü',
-      intuition: 'Telefon bataryalarındaki "4000 mAh" ibaresi tam olarak akım × zaman bağıntısıdır (toplam elektrik yükü kapasitesi).',
-      dimensional: '[I] · [T] = [I][T] (Coulomb, C)'
+      resultQuantityId: 'potential_energy',
+      title: 'Yerçekimsel Potansiyel Enerji',
+      katex: 'E_p = G \\cdot h = m \\cdot g \\cdot h',
+      badge: 'Vektör × Skaler = Skaler',
+      category: 'Enerji',
+      description: 'Yerçekimine karşı yüksekliğe taşınan cisimde depolanan enerjidir.',
+      wikiQuery: 'Potansiyel enerji',
+      intuition: 'Baraj göllerinde biriken su bu potansiyel enerjiyi tutar.',
+      dimensional: '[M][L]²[T]⁻² (Joule)'
     },
     {
-      id: 'voltage_work_formula',
-      inputs: ['work_energy', 'electric_charge'],
-      operation: 'divide',
-      resultQuantityId: 'voltage',
-      title: 'Elektriksel Potansiyel Fark (Gerilim)',
-      katex: 'V = \\frac{W}{q}',
-      badge: 'Skaler / Skaler = Skaler',
-      category: 'Elektromanyetizma',
-      description: 'Birim yük başına düşen elektriksel iş/enerjidir (Volt = Joule / Coulomb).',
-      wikiQuery: 'Gerilim (elektrik)',
-      intuition: '12 Volt bir akü, kutupları arasından geçen her 1 Coulomb yüke 12 Joule enerji pompalar.',
-      dimensional: '[M][L]²[T]⁻³[I]⁻¹ (Volt, V)'
-    },
-    {
-      id: 'ohms_law',
-      inputs: ['voltage', 'current'],
-      operation: 'divide',
-      resultQuantityId: 'resistance',
-      title: "Ohm Kanunu (Direnç)",
-      katex: 'R = \\frac{V}{I} \\iff V = I \\cdot R',
-      badge: 'Skaler / Skaler = Skaler',
-      category: 'Elektromanyetizma',
-      description: 'İletkenin potansiyel farkına karşı gösterdiği akım direnci sabitidir.',
-      wikiQuery: 'Ohm kanunu',
-      intuition: 'Gerilim su borusundaki basınç, akım akan su miktarı, direnç ise borunun darlığıdır.',
-      dimensional: '[M][L]²[T]⁻³[I]⁻² (Ohm, Ω)'
-    },
-    {
-      id: 'einstein_mass_energy',
-      inputs: ['mass', 'speed_of_light'],
+      id: 'spring_energy_formula',
+      inputs: ['spring_constant', 'area'],
       operation: 'multiply',
-      resultQuantityId: 'mass_energy',
-      title: 'Einstein Kütle-Enerji Eşdeğerliği',
-      katex: 'E = m \\cdot c^2',
-      badge: 'Skaler × Sabit = Skaler',
-      category: 'Modern Fizik',
-      description: 'Kütle donmuş enerjidir; ışık hızının karesi ile enerjiye dönüşür.',
-      wikiQuery: 'Kütle-enerji eşdeğerliği',
-      intuition: 'Sadece 1 gramlık bir madde tamamen enerjiye dönüştürülse devasa bir şehri aylarca aydınlatabilir.',
-      dimensional: '[M] · [L]²[T]⁻² = [M][L]²[T]⁻² (Joule)'
+      resultQuantityId: 'potential_energy',
+      title: 'Yay Potansiyel Enerjisi',
+      katex: 'E_p = \\frac{1}{2} k \\cdot x^2',
+      badge: 'Yay Sabiti × x² = Esneklik Enerjisi',
+      category: 'Enerji',
+      description: 'Sıkıştırılan veya gerilen bir yayın bünyesinde depoladığı mekanik enerjidir.',
+      wikiQuery: 'Potansiyel enerji',
+      intuition: 'Ok yayını gerdikçe okun kazanacağı fırlama enerjisini yayda depolarsınız.',
+      dimensional: '[M][T]⁻² · [L]² = [M][L]²[T]⁻² (Joule)'
+    },
+
+    // --- DÖNME MEKANİĞİ & AÇISAL FİZİK ---
+    {
+      id: 'moment_of_inertia_formula',
+      inputs: ['mass', 'area'],
+      operation: 'multiply',
+      resultQuantityId: 'moment_of_inertia',
+      title: 'Eylemsizlik Momenti',
+      katex: 'I = m \\cdot r^2',
+      badge: 'Kütle × Alan = Dönme Eylemsizliği',
+      category: 'Dönme Mekaniği',
+      description: 'Kütlenin dönme eksenine uzaklığının karesiyle çarpımı dönme eylemsizliğini verir.',
+      wikiQuery: 'Eylemsizlik momenti',
+      intuition: 'Buz patencisi kollarını açtığında dönmesi yavaşlar, kollarını kapattığında hızlanır.',
+      dimensional: '[M] · [L]² = [M][L]² (kg·m²)'
+    },
+    {
+      id: 'angular_momentum_formula',
+      inputs: ['moment_of_inertia', 'angular_velocity'],
+      operation: 'multiply',
+      resultQuantityId: 'angular_momentum',
+      title: 'Açısal Momentum',
+      katex: '\\vec{L} = I \\cdot \\vec{\\omega} = \\vec{r} \\times \\vec{p}',
+      badge: 'Dönme Eylemsizliği × Açısal Hız = Vektör',
+      category: 'Dönme Mekaniği',
+      description: 'Dönme hareketinin miktarını ifade eden ve dış tork olmadıkça korunan niceliktir.',
+      wikiQuery: 'Açısal momentum',
+      intuition: 'Dönen bisiklet tekerleğinin devrilmeden dengede kalmasını sağlayan temel ilkedir.',
+      dimensional: '[M][L]² · [T]⁻¹ = [M][L]²[T]⁻¹ (kg·m²/s)'
     },
     {
       id: 'torque_formula',
@@ -752,9 +1005,169 @@ const PHYSICS_DATA = {
       category: 'Mekanik',
       description: 'Kuvvetin menteşeye dik mesafeyle oluşturduğu döndürme etkisidir.',
       wikiQuery: 'Tork',
-      intuition: 'Kapı kollarının menteşenin tam karşı ucuna konulması mesafe (r) arttıkça aynı torku daha küçük kuvvetle elde etmek içindir.',
+      intuition: 'Kapı kollarının menteşenin en uzak noktasına konulması torku büyütmek içindir.',
       dimensional: '[M][L]²[T]⁻² (N·m)'
     },
+
+    // --- TERMODİNAMİK & ISI ---
+    {
+      id: 'molar_mass_formula',
+      inputs: ['mass', 'amount_of_substance'],
+      operation: 'divide',
+      resultQuantityId: 'molar_mass',
+      title: 'Molar Kütle Bağıntısı',
+      katex: 'M = \\frac{m}{n}',
+      badge: 'Skaler / Skaler = Skaler',
+      category: 'Termodinamik & Kimya',
+      description: 'Kütlenin madde miktarına (mol) oranı bir mol taneciğin kütlesini verir.',
+      wikiQuery: 'Molar kütle',
+      intuition: 'Avogadro sayısı kadar (6.022×10²³) taneciğin toplam gram karşılığıdır.',
+      dimensional: '[M] / [N] = [M][N]⁻¹ (kg/mol)'
+    },
+    {
+      id: 'ideal_gas_law',
+      inputs: ['amount_of_substance', 'temperature'],
+      operation: 'multiply',
+      resultQuantityId: 'work_energy',
+      title: 'İdeal Gaz Termal Durumu',
+      katex: 'P \\cdot V = n \\cdot R \\cdot T',
+      badge: 'Skaler × Skaler = Enerji Durumu',
+      category: 'Termodinamik',
+      description: 'Gazın basınç-hacim çarpımı madde miktarı (n) ve mutlak sıcaklık (T) ile orantılıdır.',
+      wikiQuery: 'İdeal gaz yasası',
+      intuition: 'Düdüklü tencerede gaz ısındıkça basıncın artması bu kanunun gereğidir.',
+      dimensional: '[N] · [Θ] ➔ [M][L]²[T]⁻² (Joule)'
+    },
+
+    // --- ELEKTROMANYETİZMA & DEVRELER ---
+    {
+      id: 'charge_formula',
+      inputs: ['current', 'time'],
+      operation: 'multiply',
+      resultQuantityId: 'electric_charge',
+      title: 'Elektrik Yükü ve Akım',
+      katex: 'q = I \\cdot t',
+      badge: 'Skaler × Skaler = Skaler',
+      category: 'Elektromanyetizma',
+      description: 'İletkenden geçen toplam yük, akım ile sürenin çarpımıdır.',
+      wikiQuery: 'Elektrik yükü',
+      intuition: 'Telefon bataryalarındaki mAh değeri akım × zaman bağıntısıdır.',
+      dimensional: '[I] · [T] = [I][T] (Coulomb, C)'
+    },
+    {
+      id: 'voltage_work_formula',
+      inputs: ['work_energy', 'electric_charge'],
+      operation: 'divide',
+      resultQuantityId: 'voltage',
+      title: 'Elektriksel Potansiyel Fark (Gerilim)',
+      katex: 'V = \\frac{W}{q}',
+      badge: 'Skaler / Skaler = Skaler',
+      category: 'Elektromanyetizma',
+      description: 'Birim yük başına düşen elektriksel iş/enerjidir (Volt = Joule / Coulomb).',
+      wikiQuery: 'Gerilim (elektrik)',
+      intuition: '12V akü, kutuplarından geçen her 1 Coulomb yüke 12 Joule enerji pompalar.',
+      dimensional: '[M][L]²[T]⁻³[I]⁻¹ (Volt, V)'
+    },
+    {
+      id: 'ohms_law',
+      inputs: ['voltage', 'current'],
+      operation: 'divide',
+      resultQuantityId: 'resistance',
+      title: "Ohm Kanunu (Direnç)",
+      katex: 'R = \\frac{V}{I} \\iff V = I \\cdot R',
+      badge: 'Skaler / Skaler = Skaler',
+      category: 'Elektromanyetizma',
+      description: 'İletkenin potansiyel farkına karşı gösterdiği akım direnci sabitidir.',
+      wikiQuery: 'Ohm kanunu',
+      intuition: 'Gerilim su basıncı, akım su debisi, direnç ise borunun darlığıdır.',
+      dimensional: '[M][L]²[T]⁻³[I]⁻² (Ohm, Ω)'
+    },
+    {
+      id: 'electric_power_formula',
+      inputs: ['voltage', 'current'],
+      operation: 'multiply',
+      resultQuantityId: 'power',
+      title: 'Elektriksel Güç Bağıntısı',
+      katex: 'P = V \\cdot I = I^2 \\cdot R = \\frac{V^2}{R}',
+      badge: 'Gerilim × Akım = Güç',
+      category: 'Elektromanyetizma',
+      description: 'Elektrik devresinde birim zamanda harcanan veya üretilen elektriksel güçtür.',
+      wikiQuery: 'Güç (fizik)',
+      intuition: '220V şebekeden 10A çeken bir ısıtıcı saniyede 2200 Watt (J/s) ısı üretir.',
+      dimensional: '[M][L]²[T]⁻³ (Watt)'
+    },
+    {
+      id: 'electric_field_force',
+      inputs: ['force', 'electric_charge'],
+      operation: 'divide',
+      resultQuantityId: 'electric_field',
+      title: 'Elektrik Alanı Tanımı',
+      katex: '\\vec{E} = \\frac{\\vec{F}}{q}',
+      badge: 'Kuvvet / Yük = Elektrik Alanı',
+      category: 'Elektromanyetizma',
+      description: 'Birim pozitif yüke etki eden elektrostatik kuvvettir.',
+      wikiQuery: 'Elektrik alanı',
+      intuition: 'Yüklü parçacıkların birbirini uzaktan itmesini sağlayan görünmez kuvvet alanıdır.',
+      dimensional: '[M][L][T]⁻³[I]⁻¹ (N/C veya V/m)'
+    },
+    {
+      id: 'capacitance_formula',
+      inputs: ['electric_charge', 'voltage'],
+      operation: 'divide',
+      resultQuantityId: 'capacitance',
+      title: 'Kondansatör Sığası (Kapasite)',
+      katex: 'C = \\frac{q}{V}',
+      badge: 'Yük / Gerilim = Sığa',
+      category: 'Elektromanyetizma',
+      description: 'İletken plakaların gerilim başına depolayabildiği elektrik yükü miktarıdır.',
+      wikiQuery: 'Kapasitans',
+      intuition: 'Kamera flaşları enerjiyi kondansatörde depolayıp salisede boşaltarak patlar.',
+      dimensional: '[M]⁻¹[L]⁻²[T]⁴[I]² (Farad, F)'
+    },
+    {
+      id: 'magnetic_force_wire',
+      inputs: ['current', 'distance'],
+      operation: 'multiply',
+      resultQuantityId: 'force',
+      title: 'Manyetik Kuvvet (Tele Etkiyen)',
+      katex: 'F = B \\cdot I \\cdot l',
+      badge: 'Akım × Tel Boyu ➔ Kuvvet',
+      category: 'Elektromanyetizma',
+      description: 'Manyetik alan içinden akım geçen tele dik manyetik kuvvet etki eder.',
+      wikiQuery: 'Lorentz kuvveti',
+      intuition: 'Tüm elektrik motorlarının dönmesini sağlayan temel kuvvettir.',
+      dimensional: '[M][L][T]⁻² (Newton)'
+    },
+    {
+      id: 'magnetic_flux_formula',
+      inputs: ['magnetic_field', 'area'],
+      operation: 'multiply',
+      resultQuantityId: 'magnetic_flux',
+      title: 'Manyetik Akı',
+      katex: '\\Phi_B = \\vec{B} \\cdot \\vec{A}',
+      badge: 'Manyetik Alan × Alan = Akı',
+      category: 'Elektromanyetizma',
+      description: 'Bir yüzeyden dik geçen toplam manyetik alan çizgi sayısıdır.',
+      wikiQuery: 'Manyetik akı',
+      intuition: 'Rüzgarda açılan yelken gibi, manyetik çizgilerin yüzeyden geçiş yoğunluğudur.',
+      dimensional: '[M][L]²[T]⁻²[I]⁻¹ (Weber, Wb)'
+    },
+    {
+      id: 'faraday_induction_formula',
+      inputs: ['magnetic_flux', 'time'],
+      operation: 'divide',
+      resultQuantityId: 'voltage',
+      title: 'Faraday İndüksiyon Kanunu',
+      katex: '\\epsilon = -\\frac{\\Delta\\Phi_B}{\\Delta t}',
+      badge: 'Manyetik Akı / Zaman = İndüksiyon Gerilimi',
+      category: 'Elektromanyetizma',
+      description: 'Manyetik akı değiştikçe devrede elektrik akımı ve gerilim (emk) doğar.',
+      wikiQuery: 'Faraday indüksiyon kanunu',
+      intuition: 'Barajlardaki jeneratörlerin dönerek elektrik üretmesinin temel kanunudur.',
+      dimensional: '[M][L]²[T]⁻³[I]⁻¹ (Volt)'
+    },
+
+    // --- DALGALAR, OPTİK & IŞIK ---
     {
       id: 'frequency_formula',
       inputs: ['time', 'time'],
@@ -762,7 +1175,7 @@ const PHYSICS_DATA = {
       resultQuantityId: 'frequency',
       title: 'Periyot ve Frekans',
       katex: 'f = \\frac{1}{T}',
-      badge: '1 / Skaler = Skaler',
+      badge: '1 / Zaman = Frekans',
       category: 'Dalgalar',
       description: 'Birim zamandaki salınım veya dalga adedidir.',
       wikiQuery: 'Frekans',
@@ -776,26 +1189,27 @@ const PHYSICS_DATA = {
       resultQuantityId: 'speed',
       title: 'Dalga Yayılma Hızı',
       katex: 'v = \\lambda \\cdot f',
-      badge: 'Skaler × Skaler = Skaler',
+      badge: 'Dalga Boyu × Frekans = Hız',
       category: 'Dalgalar',
       description: 'Dalga boyu ile frekansın çarpımı dalganın yayılma hızını verir.',
       wikiQuery: 'Dalga boyu',
-      intuition: 'Denizdeki dalgaların sıklığı ile tepe aralıkları çarpıldığında dalganın kıyıya ulaşma hızı bulunur.',
+      intuition: 'Denizdeki dalgaların sıklığı ile tepe aralıklarının çarpımı kıyıya ulaşma hızıdır.',
       dimensional: '[L] · [T]⁻¹ = [L][T]⁻¹ (m/s)'
     },
     {
-      id: 'molar_mass_formula',
-      inputs: ['mass', 'amount_of_substance'],
+      id: 'refractive_index_formula',
+      inputs: ['speed_of_light', 'speed'],
+      fallbackInputs: ['speed_of_light', 'velocity'],
       operation: 'divide',
-      resultQuantityId: 'molar_mass',
-      title: 'Molar Kütle Bağıntısı',
-      katex: 'M = \\frac{m}{n}',
-      badge: 'Skaler / Skaler = Skaler',
-      category: 'Termodinamik & Kimya',
-      description: 'Kütlenin madde miktarına (mol) oranı bir mol taneciğin kütlesini verir.',
-      wikiQuery: 'Molar kütle',
-      intuition: 'Avogadro sayısı kadar (6.022×10²³) taneciğin toplam kütlesidir. Karbon-12 için 12 g/mol dür.',
-      dimensional: '[M] / [N] = [M][N]⁻¹ (kg/mol)'
+      resultQuantityId: 'refractive_index',
+      title: 'Kırılma İndisi Tanımı',
+      katex: 'n = \\frac{c}{v}',
+      badge: 'Işık Hızı / Ortam Hızı = İndis',
+      category: 'Optik',
+      description: 'Işığın boşluktaki hızının ortamdaki yayılma hızına oranıdır.',
+      wikiQuery: 'Kırılma indisi',
+      intuition: 'Suyun içine bırakılan kalemin kırık gözükmesi ışığın suda yavaşlamasındandır.',
+      dimensional: '[1] (Boyutsuz)'
     },
     {
       id: 'illuminance_formula',
@@ -805,26 +1219,70 @@ const PHYSICS_DATA = {
       resultQuantityId: 'illuminance',
       title: 'Aydınlanma Şiddeti (Fotometri)',
       katex: 'E = \\frac{I_v}{A} = \\frac{I_v}{d^2}',
-      badge: 'Skaler / Skaler = Skaler',
+      badge: 'Işık Şiddeti / Alan = Lüks',
       category: 'Optik',
-      description: 'Işık şiddetinin aydınlatılan alana veya mesafenin karesine oranı aydınlanma şiddetini verir.',
+      description: 'Işık şiddetinin aydınlatılan alana veya mesafenin karesine oranıdır.',
       wikiQuery: 'Aydınlanma şiddeti',
-      intuition: 'Lambadan uzaklaştıkça okuduğun kitabın yüzeyindeki aydınlık mesafenin karesiyle hızla azalır.',
+      intuition: 'Işık kaynağından uzaklaştıkça masadaki aydınlık mesafenin karesiyle azalır.',
       dimensional: '[J] / [L]² = [J][L]⁻² (Lüks, lx)'
     },
+
+    // --- MODERN FİZİK & KUANTUM ---
     {
-      id: 'ideal_gas_law',
-      inputs: ['amount_of_substance', 'temperature'],
+      id: 'einstein_mass_energy',
+      inputs: ['mass', 'speed_of_light'],
+      operation: 'multiply',
+      resultQuantityId: 'mass_energy',
+      title: 'Einstein Kütle-Enerji Eşdeğerliği',
+      katex: 'E = m \\cdot c^2',
+      badge: 'Kütle × c² = Durgun Enerji',
+      category: 'Modern Fizik',
+      description: 'Kütle yoğunlaşmış enerjidir; ışık hızının karesi ile doğrudan enerjiye dönüşür.',
+      wikiQuery: 'Kütle-enerji eşdeğerliği',
+      intuition: 'Sadece 1 gramlık madde tamamen enerjiye dönüşürse devasa bir şehri aylarca aydınlatabilir.',
+      dimensional: '[M] · [L]²[T]⁻² = [M][L]²[T]⁻² (Joule)'
+    },
+    {
+      id: 'planck_photon_energy',
+      inputs: ['planck_constant', 'frequency'],
       operation: 'multiply',
       resultQuantityId: 'work_energy',
-      title: 'İdeal Gaz Termal Durumu',
-      katex: 'P \\cdot V = n \\cdot R \\cdot T',
-      badge: 'Skaler × Skaler = Enerji Durumu',
-      category: 'Termodinamik',
-      description: 'Gazın basınç-hacim çarpımı madde miktarı (n) ve mutlak sıcaklık (T) ile orantılıdır.',
-      wikiQuery: 'İdeal gaz yasası',
-      intuition: 'Düdüklü tencerede gaz ısındıkça basıncın yükselmesi veya sıcak hava balonunun genleşmesi bu kanundur.',
-      dimensional: '[N] · [Θ] ➔ [M][L]²[T]⁻² (Joule)'
+      title: 'Planck Foton Enerjisi',
+      katex: 'E = h \\cdot f = \\frac{h \\cdot c}{\\lambda}',
+      badge: 'Planck × Frekans = Foton Enerjisi',
+      category: 'Modern Fizik',
+      description: 'Işık kuantumlarının (fotonların) enerjisi frekanslarıyla doğru orantılıdır.',
+      wikiQuery: 'Foton',
+      intuition: 'Morötesi ve X-ışınlarının cildi yakmasının sebebi frekanslarının ve foton enerjilerinin yüksekliğidir.',
+      dimensional: '[M][L]²[T]⁻¹ · [T]⁻¹ = [M][L]²[T]⁻² (Joule)'
+    },
+    {
+      id: 'de_broglie_wavelength',
+      inputs: ['planck_constant', 'momentum'],
+      operation: 'divide',
+      resultQuantityId: 'wavelength',
+      title: 'De Broglie Madde Dalga Boyu',
+      katex: '\\lambda = \\frac{h}{p} = \\frac{h}{m \\cdot v}',
+      badge: 'Planck / Momentum = Dalga Boyu',
+      category: 'Modern Fizik',
+      description: 'Hareket halindeki her maddesel parçacığa dalga özellikleri eşlik eder.',
+      wikiQuery: 'Madde dalgaları',
+      intuition: 'Elektron mikroskoplarının atomları gösterebilmesi elektronların dalga boyunun ışık dalgasından çok daha küçük olması sayesindedir.',
+      dimensional: '[M][L]²[T]⁻¹ / [M][L][T]⁻¹ = [L] (Metre)'
+    },
+    {
+      id: 'photon_momentum_formula',
+      inputs: ['work_energy', 'speed_of_light'],
+      operation: 'divide',
+      resultQuantityId: 'momentum',
+      title: 'Foton Momentumu',
+      katex: 'p = \\frac{E}{c} = \\frac{h}{\\lambda}',
+      badge: 'Enerji / Işık Hızı = Momentum',
+      category: 'Modern Fizik',
+      description: 'Durgun kütlesi sıfır olan fotonların taşıdığı momentumdur.',
+      wikiQuery: 'Foton',
+      intuition: 'Güneş yelkenlileri uzayda yakıt kullanmadan fotonların çarpma momentumu ile itilir.',
+      dimensional: '[M][L]²[T]⁻² / [L][T]⁻¹ = [M][L][T]⁻¹ (kg·m/s)'
     }
   ],
 
@@ -834,7 +1292,6 @@ const PHYSICS_DATA = {
   findReaction(entityA, entityB) {
     if (!entityA || !entityB) return null;
 
-    // Resolve IDs: if it's a formula, its primary identity is its resultQuantityId
     const idA = entityA.resultQuantityId || entityA.id;
     const idB = entityB.resultQuantityId || entityB.id;
 

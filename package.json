@@ -1,7 +1,7 @@
 {
-  "name": "fizik-simyasi",
+  "name": "lazaloglucafizik",
   "version": "1.0.0",
-  "description": "Fizik Simyası | Skaler & Vektörel Formül Laboratuvarı",
+  "description": "lazaloglucafizik - Fizik Laboratuvarı & Formül Simyası",
   "scripts": {
     "dev": "node server.js"
   },
@@ -9,6 +9,7 @@
     "physics",
     "math",
     "alchemy",
+    "lazaloglucafizik",
     "interactive"
   ],
   "license": "MIT"

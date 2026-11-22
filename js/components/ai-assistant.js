@@ -312,7 +312,7 @@ class AIAssistant {
     this.feed.scrollTop = this.feed.scrollHeight;
 
     const unlockedQuantities = window.appState ? Array.from(window.appState.unlockedQuantities).join(', ') : 'Temel büyüklükler';
-    const systemPrompt = `Sen bir fizik profesörü ve interaktif fizik laboratuvarı mentörüsün. Kullanıcı 'Fizik Simyası' oyununda büyüklükleri birbirinin veya formüllerin üzerine sürükleyerek kanunları sentezliyor. Kullanıcının açık büyüklükleri: ${unlockedQuantities}. Cevapların net, Türkçe, samimi, fiziksel sezgiye dayalı olsun (AI slop / boş laf kalıpları olmasın). Formülleri KaTeX formatında yaz.`;
+    const systemPrompt = `Sen bir fizik profesörü ve interaktif fizik laboratuvarı mentörüsün. Kullanıcı 'lazaloglucafizik' uygulamasında büyüklükleri birbirinin veya formüllerin üzerine sürükleyerek kanunları sentezliyor. Kullanıcının açık büyüklükleri: ${unlockedQuantities}. Cevapların net, Türkçe, samimi, fiziksel sezgiye dayalı olsun (AI slop / boş laf kalıpları olmasın). Formülleri KaTeX formatında yaz.`;
 
     try {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
