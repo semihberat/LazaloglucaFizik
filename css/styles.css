@@ -332,10 +332,44 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   transition: all 0.15s ease;
+  cursor: pointer;
 }
 .formula-action-btn:hover {
   color: var(--scalar-color);
   background: rgba(56, 189, 248, 0.15);
+}
+
+.formula-atomic-btn {
+  color: #38bdf8;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.formula-atomic-btn:hover {
+  color: #ffffff;
+  background: rgba(56, 189, 248, 0.3);
+  transform: scale(1.08);
+}
+
+.token-action-btn {
+  color: #38bdf8;
+  font-size: 11px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  transition: all 0.15s ease;
+  line-height: 1;
+  cursor: pointer;
+}
+.token-action-btn:hover {
+  color: #ffffff;
+  background: rgba(56, 189, 248, 0.3);
+  transform: scale(1.08);
 }
 
 .formula-node-title {

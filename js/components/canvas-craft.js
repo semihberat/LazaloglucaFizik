@@ -159,12 +159,18 @@ class InteractivePhysicsCanvas {
     const typeClass = isScalar ? 'token-scalar' : (isConstant ? 'token-constant' : 'token-vector');
     const typeLabel = isScalar ? 'Skaler' : (isConstant ? 'Sabit' : 'Vektör');
 
+    const baseQuantityIds = ['mass', 'distance', 'displacement', 'time', 'current', 'temperature', 'amount_of_substance', 'luminous_intensity'];
+    const canDecomposeQuantity = !baseQuantityIds.includes(quantity.id) && quantity.dimension && quantity.dimension !== '[1]';
+
     el.classList.add(typeClass);
 
     el.innerHTML = `
       <div class="token-header">
         <span class="token-type-pill">${typeLabel}</span>
-        <button class="token-close-btn" title="Kaldır">✕</button>
+        <div class="flex items-center gap-1">
+          ${canDecomposeQuantity ? `<button class="token-action-btn token-decompose-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI)">⚛️</button>` : ''}
+          <button class="token-close-btn" title="Kaldır">✕</button>
+        </div>
       </div>
       <div class="token-body">
         <span class="token-symbol font-serif">${quantity.symbol}</span>
@@ -199,6 +205,14 @@ class InteractivePhysicsCanvas {
     this.attachNodeInteraction(nodeObj);
     this.updateEmptyState();
 
+    const tokenDecomposeBtn = el.querySelector('.token-decompose-btn');
+    if (tokenDecomposeBtn) {
+      tokenDecomposeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.decomposeAtomic(nodeObj);
+      });
+    }
+
     // Spawn entrance animation
     el.classList.add('node-enter');
     setTimeout(() => el.classList.remove('node-enter'), 400);
@@ -219,7 +233,8 @@ class InteractivePhysicsCanvas {
       <div class="formula-node-header">
         <span class="formula-badge-category">${formula.category}</span>
         <div class="flex items-center gap-1">
-          <button class="formula-action-btn formula-decompose-btn" title="Bileşenlerine Ayrıştır">⤢</button>
+          <button class="formula-action-btn formula-atomic-btn" title="En İnce Temel Bileşenlerine Ayrıştır (Atomik SI: m, x, t...)">⚛️</button>
+          <button class="formula-action-btn formula-decompose-btn" title="1 Adım Geri Ayrıştır">⤢</button>
           <button class="token-close-btn" title="Kaldır">✕</button>
         </div>
       </div>
@@ -291,9 +306,14 @@ class InteractivePhysicsCanvas {
       }
     });
 
+    el.querySelector('.formula-atomic-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.decomposeAtomic(nodeObj);
+    });
+
     el.querySelector('.formula-decompose-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      this.decomposeFormula(nodeObj);
+      this.decomposeStep(nodeObj);
     });
 
     // Spawn entrance ripple
@@ -399,13 +419,17 @@ class InteractivePhysicsCanvas {
   }
 
   /**
-   * Attempt fusion between two entities
+   * Attempt fusion between two entities (handles both registered and unregistered combinations)
    */
   attemptFusion(nodeA, nodeB) {
-    const reaction = PHYSICS_DATA.findReaction(nodeA.data, nodeB.data);
+    let reaction = PHYSICS_DATA.findReaction(nodeA.data, nodeB.data);
+
+    // If not a registered textbook formula, flexibly synthesize an unregistered custom physical formula!
+    if (!reaction) {
+      reaction = this.createCustomReaction(nodeA.data, nodeB.data);
+    }
 
     if (reaction) {
-      // SUCCESSFUL FUSION!
       window.soundManager.playSuccess();
 
       const midX = (nodeA.x + (nodeB.x || nodeA.x)) / 2;
@@ -433,8 +457,8 @@ class InteractivePhysicsCanvas {
         });
       }
 
-      // Record in App State (Codex, unlocks, etc.)
-      if (window.appState) {
+      // Record in App State only if it's an official registered discovery
+      if (window.appState && !reaction.isCustom) {
         window.appState.recordDiscovery(reaction);
       }
     } else {
@@ -452,21 +476,228 @@ class InteractivePhysicsCanvas {
   }
 
   /**
-   * Decompose a formula node back into its constituent quantities
+   * Dynamically synthesize a custom unregistered physical formula
+   */
+  createCustomReaction(entityA, entityB) {
+    const nameA = entityA.name || entityA.title || 'Bileşen A';
+    const nameB = entityB.name || entityB.title || 'Bileşen B';
+    const symA = entityA.symbol || 'A';
+    const symB = entityB.symbol || 'B';
+    const dimA = entityA.dimension || entityA.dimensional || '[1]';
+    const dimB = entityB.dimension || entityB.dimensional || '[1]';
+
+    const combinedDim = this.multiplyDimensions(dimA, dimB);
+    const customId = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+    return {
+      id: customId,
+      isCustom: true,
+      title: `${nameA} & ${nameB} Sentezi`,
+      katex: `${symA} \\cdot ${symB}`,
+      category: 'Özel Sentez',
+      badge: `${symA} · ${symB}`,
+      description: `Serbestçe sentezlenmiş özel fiziksel bileşik. Boyut: ${combinedDim}`,
+      inputs: [entityA.id || 'compA', entityB.id || 'compB'],
+      dimensional: combinedDim,
+      dimension: combinedDim,
+      wikiQuery: nameA,
+      intuition: `${nameA} (${symA}) ile ${nameB} (${symB}) büyüklüklerinin serbest fiziksel çarpımı. Boyut analizi: ${combinedDim}.`
+    };
+  }
+
+  /**
+   * Helper: Parse dimension string into powers map { M, L, T, I, Θ, N, J }
+   */
+  parseDimToPowers(dimStr) {
+    const powers = { M: 0, L: 0, T: 0, I: 0, Θ: 0, N: 0, J: 0 };
+    if (!dimStr) return powers;
+    const superscripts = {
+      '¹': 1, '²': 2, '³': 3, '⁴': 4, '⁵': 5,
+      '⁻¹': -1, '⁻²': -2, '⁻³': -3, '⁻⁴': -4, '⁻⁵': -5
+    };
+    const regex = /\[([MLTIΘNJ1])\](⁻?[¹²³⁴⁵\d]+)?/g;
+    let match;
+    while ((match = regex.exec(dimStr)) !== null) {
+      const sym = match[1];
+      if (sym === '1') continue;
+      let p = 1;
+      if (match[2]) {
+        const pStr = match[2];
+        if (superscripts[pStr] !== undefined) {
+          p = superscripts[pStr];
+        } else {
+          const n = parseInt(pStr.replace('⁻', '-'));
+          if (!isNaN(n)) p = n;
+        }
+      }
+      powers[sym] = (powers[sym] || 0) + p;
+    }
+    return powers;
+  }
+
+  /**
+   * Helper: Convert powers map back to dimension string
+   */
+  powersToDimStr(powers) {
+    const toSuperscript = (num) => {
+      if (num === 1) return '';
+      const map = {
+        '-1': '⁻¹', '-2': '⁻²', '-3': '⁻³', '-4': '⁻⁴', '-5': '⁻⁵',
+        '2': '²', '3': '³', '4': '⁴', '5': '⁵'
+      };
+      return map[String(num)] || ('^' + num);
+    };
+    const order = ['M', 'L', 'T', 'I', 'Θ', 'N', 'J'];
+    let str = '';
+    for (const sym of order) {
+      const p = powers[sym];
+      if (p && p !== 0) {
+        str += '[' + sym + ']' + toSuperscript(p);
+      }
+    }
+    return str || '[1]';
+  }
+
+  /**
+   * Helper: Multiply two dimension strings
+   */
+  multiplyDimensions(dimA, dimB) {
+    const pA = this.parseDimToPowers(dimA);
+    const pB = this.parseDimToPowers(dimB);
+    const combined = {};
+    for (const k of ['M', 'L', 'T', 'I', 'Θ', 'N', 'J']) {
+      combined[k] = (pA[k] || 0) + (pB[k] || 0);
+    }
+    return this.powersToDimStr(combined);
+  }
+
+  /**
+   * Helper: Extract effective single dimensional string from data
+   */
+  extractEffectiveDimension(data) {
+    if (data.dimension) return data.dimension;
+    if (data.resultQuantityId) {
+      const q = PHYSICS_DATA.quantities.find(item => item.id === data.resultQuantityId);
+      if (q && q.dimension) return q.dimension;
+    }
+    if (data.dimensional) {
+      let str = data.dimensional;
+      if (str.includes('=')) {
+        str = str.split('=')[1].trim();
+      }
+      if (str.includes('(')) {
+        str = str.split('(')[0].trim();
+      }
+      return str;
+    }
+    return '[1]';
+  }
+
+  /**
+   * Helper: Extract exact fundamental SI quantities list (e.g. 2 times 'time' for T⁻²)
+   */
+  getFundamentalQuantitiesList(dimStr) {
+    const powers = this.parseDimToPowers(dimStr);
+    const result = [];
+    const symbolToId = {
+      'M': 'mass',
+      'L': 'distance',
+      'T': 'time',
+      'I': 'current',
+      'Θ': 'temperature',
+      'N': 'amount_of_substance',
+      'J': 'luminous_intensity'
+    };
+    for (const sym of ['M', 'L', 'T', 'I', 'Θ', 'N', 'J']) {
+      const count = Math.abs(powers[sym] || 0);
+      for (let i = 0; i < count; i++) {
+        result.push(symbolToId[sym]);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Full fundamental atomic decomposition (down to basic SI quantities with exact multiplicity: m, x, t, t...)
+   */
+  decomposeAtomic(node) {
+    const data = node.data;
+    const x = node.x;
+    const y = node.y;
+
+    const dimStr = this.extractEffectiveDimension(data);
+    let fundamentalIds = this.getFundamentalQuantitiesList(dimStr);
+
+    // Fallback if dimensional string was unparseable
+    if (fundamentalIds.length === 0 && data.inputs && data.inputs.length >= 2) {
+      fundamentalIds = data.inputs;
+    }
+
+    if (fundamentalIds.length === 0) {
+      fundamentalIds = ['mass', 'distance', 'time'];
+    }
+
+    // Map IDs to actual quantity objects
+    const quantitiesToSpawn = fundamentalIds
+      .map(id => PHYSICS_DATA.quantities.find(q => q.id === id))
+      .filter(Boolean);
+
+    // Remove the original node
+    this.removeNode(node.id);
+    window.soundManager.playPop();
+    this.spawnParticleRipple(x, y);
+
+    // Lay out spawned tokens in a clean orbital polygon around (x, y)
+    const count = quantitiesToSpawn.length;
+    const radius = Math.max(90, Math.min(210, 50 + count * 22));
+
+    quantitiesToSpawn.forEach((q, index) => {
+      const angle = (2 * Math.PI * index) / count - Math.PI / 2;
+      const targetX = x + Math.cos(angle) * radius;
+      const targetY = y + Math.sin(angle) * radius;
+      this.spawnQuantityNode(q, targetX, targetY);
+    });
+  }
+
+  /**
+   * 1-Step decomposition into immediate constituent inputs
+   */
+  decomposeStep(node) {
+    const data = node.data;
+    const x = node.x;
+    const y = node.y;
+
+    let inputIds = data.inputs || [];
+    if (inputIds.length === 0 && data.fallbackInputs) {
+      inputIds = data.fallbackInputs;
+    }
+
+    if (inputIds.length < 2) {
+      this.decomposeAtomic(node);
+      return;
+    }
+
+    const q1 = PHYSICS_DATA.quantities.find(q => q.id === inputIds[0]);
+    const q2 = PHYSICS_DATA.quantities.find(q => q.id === inputIds[1]);
+
+    if (!q1 || !q2) {
+      this.decomposeAtomic(node);
+      return;
+    }
+
+    this.removeNode(node.id);
+    window.soundManager.playPop();
+    this.spawnParticleRipple(x, y);
+
+    this.spawnQuantityNode(q1, x - 85, y);
+    this.spawnQuantityNode(q2, x + 85, y);
+  }
+
+  /**
+   * Backward-compatible alias
    */
   decomposeFormula(formulaNode) {
-    const formula = formulaNode.data;
-    const q1 = PHYSICS_DATA.quantities.find(q => q.id === formula.inputs[0]);
-    const q2 = PHYSICS_DATA.quantities.find(q => q.id === formula.inputs[1]);
-
-    const x = formulaNode.x;
-    const y = formulaNode.y;
-
-    this.removeNode(formulaNode.id);
-    window.soundManager.playPop();
-
-    if (q1) this.spawnQuantityNode(q1, x - 70, y);
-    if (q2) this.spawnQuantityNode(q2, x + 70, y);
+    this.decomposeAtomic(formulaNode);
   }
 
   removeNode(id) {
