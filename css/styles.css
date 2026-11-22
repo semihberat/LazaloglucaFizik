@@ -75,6 +75,50 @@ body {
   scrollbar-color: #334155 transparent;
 }
 
+/* Inventory Drawer & Custom Quantities Scrollbar */
+#quantitiesDrawer {
+  height: calc(100vh - 3.5rem) !important;
+  max-height: calc(100vh - 3.5rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#quantitiesList {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.45) rgba(10, 14, 26, 0.85);
+}
+
+#quantitiesList::-webkit-scrollbar {
+  width: 7px !important;
+  display: block !important;
+}
+
+#quantitiesList::-webkit-scrollbar-track {
+  background: rgba(10, 14, 26, 0.8) !important;
+  border-radius: 9999px;
+  margin: 6px 0;
+}
+
+#quantitiesList::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4) !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+#quantitiesList::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
 #aiAssistantDrawer {
   height: calc(100vh - 3.5rem) !important;
   max-height: calc(100vh - 3.5rem) !important;

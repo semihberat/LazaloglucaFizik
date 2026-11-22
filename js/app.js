@@ -76,10 +76,28 @@ class PhysicsAlchemyApp {
   initEventListeners() {
     // Search input
     if (this.quantitySearch) {
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
       this.quantitySearch.addEventListener('input', (e) => {
         this.searchQuery = e.target.value.toLowerCase().trim();
+        if (clearSearchBtn) {
+          if (this.searchQuery) {
+            clearSearchBtn.classList.remove('hidden');
+          } else {
+            clearSearchBtn.classList.add('hidden');
+          }
+        }
         this.renderSidebarList();
       });
+
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+          this.quantitySearch.value = '';
+          this.searchQuery = '';
+          clearSearchBtn.classList.add('hidden');
+          this.renderSidebarList();
+          this.quantitySearch.focus();
+        });
+      }
     }
 
     // Filter Buttons
@@ -212,6 +230,7 @@ class PhysicsAlchemyApp {
 
   renderSidebarList() {
     if (!this.quantitiesList) return;
+    const prevScrollTop = this.quantitiesList.scrollTop;
     this.quantitiesList.innerHTML = '';
 
     const available = PHYSICS_DATA.quantities.filter(q => this.unlockedQuantities.has(q.id));
@@ -297,6 +316,7 @@ class PhysicsAlchemyApp {
     });
 
     lucide.createIcons();
+    this.quantitiesList.scrollTop = prevScrollTop;
   }
 
   renderRecentStrip() {

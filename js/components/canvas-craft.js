@@ -196,6 +196,7 @@ class InteractivePhysicsCanvas {
       id: instanceId,
       type: 'quantity',
       data: quantity,
+      constituents: constituents || this.resolveConstituentsForNode({ type: 'quantity', data: quantity }),
       x: parseInt(el.style.left) + 65,
       y: parseInt(el.style.top) + 60,
       el: el
@@ -223,7 +224,7 @@ class InteractivePhysicsCanvas {
   /**
    * Spawn a Merged Formula Node
    */
-  spawnFormulaNode(formula, x, y) {
+  spawnFormulaNode(formula, x, y, constituents = null) {
     const instanceId = 'formula_' + (this.nextInstanceId++);
     const el = document.createElement('div');
     el.className = 'canvas-node formula-node';
@@ -279,6 +280,7 @@ class InteractivePhysicsCanvas {
       id: instanceId,
       type: 'formula',
       data: formula,
+      constituents: constituents || this.resolveConstituentsForNode({ type: 'formula', data: formula }),
       x: parseInt(el.style.left) + 120,
       y: parseInt(el.style.top) + 90,
       el: el
@@ -442,8 +444,13 @@ class InteractivePhysicsCanvas {
       this.removeNode(nodeA.id);
       if (nodeB.id) this.removeNode(nodeB.id);
 
+      // Combine constituents from both nodes with exact multiplicity!
+      const constituentsA = this.resolveConstituentsForNode(nodeA);
+      const constituentsB = this.resolveConstituentsForNode(nodeB);
+      const combinedConstituents = [...constituentsA, ...constituentsB];
+
       // Spawn the resulting Formula Node
-      const newFormulaNode = this.spawnFormulaNode(reaction, midX, midY);
+      const newFormulaNode = this.spawnFormulaNode(reaction, midX, midY, combinedConstituents);
 
       // Confetti burst
       if (typeof confetti === 'function') {
@@ -618,6 +625,25 @@ class InteractivePhysicsCanvas {
   }
 
   /**
+   * Resolve constituent base quantity IDs for any node or data object
+   */
+  resolveConstituentsForNode(node) {
+    if (node && node.constituents && node.constituents.length > 0) {
+      return [...node.constituents];
+    }
+    const data = (node && node.data) ? node.data : (node || {});
+    const baseIds = ['mass', 'distance', 'displacement', 'time', 'current', 'temperature', 'amount_of_substance', 'luminous_intensity'];
+    if (data.id && baseIds.includes(data.id)) {
+      return [data.id === 'displacement' ? 'distance' : data.id];
+    }
+    const dimStr = this.extractEffectiveDimension(data);
+    const list = this.getFundamentalQuantitiesList(dimStr);
+    if (list && list.length > 0) return list;
+    if (data.inputs && data.inputs.length > 0) return data.inputs;
+    return [data.id || 'mass'];
+  }
+
+  /**
    * Full fundamental atomic decomposition (down to basic SI quantities with exact multiplicity: m, x, t, t...)
    */
   decomposeAtomic(node) {
@@ -625,12 +651,11 @@ class InteractivePhysicsCanvas {
     const x = node.x;
     const y = node.y;
 
-    const dimStr = this.extractEffectiveDimension(data);
-    let fundamentalIds = this.getFundamentalQuantitiesList(dimStr);
-
-    // Fallback if dimensional string was unparseable
-    if (fundamentalIds.length === 0 && data.inputs && data.inputs.length >= 2) {
-      fundamentalIds = data.inputs;
+    let fundamentalIds = [];
+    if (node && node.constituents && node.constituents.length > 0) {
+      fundamentalIds = [...node.constituents];
+    } else {
+      fundamentalIds = this.resolveConstituentsForNode(node);
     }
 
     if (fundamentalIds.length === 0) {
