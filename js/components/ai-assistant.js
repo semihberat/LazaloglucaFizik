@@ -82,7 +82,7 @@ class AIAssistant {
         this.apiKey = val || this.defaultApiKey;
         localStorage.setItem('physics_alchemy_gemini_key', this.apiKey);
         this.updateStatus();
-        this.appendCard('assistant', '✨ <strong>Gemini 3.5 Flash Fizik Mentörü Aktif!</strong> Artık her türlü fizik teorisi, paradoks ve matematiksel bağıntıyı tartışabiliriz.');
+        this.appendCard('assistant', '✨ <strong>LazalBot Fizik Mentörü Hazır!</strong> Artık her türlü fizik teorisi, paradoks ve matematiksel bağıntıyı tartışabiliriz.');
         settingsModal.classList.add('opacity-0');
         setTimeout(() => settingsModal.classList.add('hidden'), 200);
       });
@@ -94,7 +94,7 @@ class AIAssistant {
         apiKeyInput.value = '';
         localStorage.removeItem('physics_alchemy_gemini_key');
         this.updateStatus();
-        this.appendCard('assistant', 'ℹ️ Varsayılan Gemini 3.5 Flash anahtarı aktif.');
+        this.appendCard('assistant', 'ℹ️ Varsayılan LazalBot çekirdeği aktif.');
         settingsModal.classList.add('opacity-0');
         setTimeout(() => settingsModal.classList.add('hidden'), 200);
       });
@@ -103,7 +103,7 @@ class AIAssistant {
 
   updateStatus() {
     if (this.statusText) {
-      this.statusText.textContent = 'Gemini 3.5 Flash Aktif';
+      this.statusText.textContent = 'LazalBot Aktif (Çevrimiçi)';
       this.statusText.className = 'text-[10px] text-emerald-400 font-medium';
     }
   }
@@ -238,20 +238,21 @@ class AIAssistant {
     loadingDiv.className = 'bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-slate-400 text-xs flex items-center gap-2';
     loadingDiv.innerHTML = `
       <div class="w-3.5 h-3.5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-      <span>Gemini 3.5 Flash fiziksel analizi yapıyor...</span>
+      <span>LazalBot teoriyi inceliyor...</span>
     `;
     this.feed.appendChild(loadingDiv);
     this.feed.scrollTop = this.feed.scrollHeight;
 
     const unlockedQuantities = window.appState ? Array.from(window.appState.unlockedQuantities).join(', ') : 'Temel büyüklükler';
-    const systemPrompt = `Sen 'lazaloglucafizik' platformunun baş kuramsal ve deneysel fizikçisisin. Richard Feynman ve Lev Landau tarzında; derin fiziksel sezgiye, matematiksel titizliğe sahip, aynı zamanda kullanıcıyla derin fiziksel ve felsefi tartışmalara (örneğin kuantum mekaniği yorumları, görelilik paradoksları, termodinamiğin yönü, sicim teorisi, kara delikler ve kozmoloji) girebilen gerçek bir yapay zekasın.
+    const systemPrompt = `Sen 'LazalBot' adında, 'lazaloglucafizik' platformunun baş kuramsal ve deneysel fizikçisisin. Richard Feynman ve Lev Landau tarzında; derin fiziksel sezgiye, matematiksel titizliğe sahip, aynı zamanda kullanıcıyla derin fiziksel ve felsefi tartışmalara (örneğin kuantum mekaniği yorumları, görelilik paradoksları, termodinamiğin yönü, sicim teorisi, kara delikler ve kozmoloji) girebilen gerçek bir yapay zekasın. Senin adın LazalBot.
 
 Görev ve Kuralların:
-1. Kullanıcıyla derinlemesine fizik tartışmaları yap. Sorularına basmakalıp laflar yerine mekanizmanın neden ve nasıl çalıştığını anlat.
-2. Formülleri KaTeX formatında yaz: Satır içi formüller için $...$, blok formüller için $$...$$ kullan (örneğin $F = ma$, $E = mc^2$, $\\nabla \\times \\vec{B} = \\mu_0 \\vec{J}$).
-3. Kullanıcının platformda açtığı büyüklükleri göz önünde bulundur: ${unlockedQuantities}.
-4. Tartışmalarda boyut analizi, enerji korunumu, simetriler (Noether teoremi) gibi temel ilkeleri kullan.
-5. Samimi, enerjik, bilimsel olarak ödün vermeyen, açık ve anlaşılır bir Türkçe kullan.`;
+1. Adın LazalBot; kullanıcının sorusu veya selamı olursa LazalBot olarak yanıt ver.
+2. Kullanıcıyla derinlemesine fizik tartışmaları yap. Sorularına basmakalıp laflar yerine mekanizmanın neden ve nasıl çalıştığını anlat.
+3. Formülleri KaTeX formatında yaz: Satır içi formüller için $...$, blok formüller için $$...$$ kullan (örneğin $F = ma$, $E = mc^2$, $\\nabla \\times \\vec{B} = \\mu_0 \\vec{J}$).
+4. Kullanıcının platformda açtığı büyüklükleri göz önünde bulundur: ${unlockedQuantities}.
+5. Tartışmalarda boyut analizi, enerji korunumu, simetriler (Noether teoremi) gibi temel ilkeleri kullan.
+6. Samimi, enerjik, bilimsel olarak ödün vermeyen, açık ve anlaşılır bir Türkçe kullan.`;
 
     // Append to conversation history (keep last 16 messages)
     this.chatHistory.push({ role: 'user', parts: [{ text: userText }] });

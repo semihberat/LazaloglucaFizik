@@ -90,8 +90,8 @@
       <!-- AI Physics Coach Toggle -->
       <button id="toggleAiPanelBtn"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 text-xs font-medium transition active:scale-95">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
-        <span>AI Fizikçi</span>
+        <i data-lucide="bot" class="w-3.5 h-3.5 text-purple-400"></i>
+        <span>LazalBot</span>
       </button>
 
       <!-- Codex Modal Toggle -->
@@ -253,13 +253,13 @@
             <i data-lucide="sparkles" class="w-4 h-4"></i>
           </div>
           <div>
-            <h2 class="text-xs font-bold text-white">Fizik Sezgisi & AI</h2>
-            <p id="aiStatusText" class="text-[10px] text-purple-400">Dahili Akıllı Fizikçi</p>
+            <h2 class="text-xs font-bold text-white">LazalBot</h2>
+            <p id="aiStatusText" class="text-[10px] text-emerald-400 font-medium">Çevrimiçi</p>
           </div>
         </div>
 
         <div class="flex items-center gap-1">
-          <button id="openAiSettingsBtn" title="Gemini API Anahtarı"
+          <button id="openAiSettingsBtn" title="LazalBot Ayarları"
             class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200">
             <i data-lucide="settings" class="w-3.5 h-3.5"></i>
           </button>
@@ -408,7 +408,7 @@
     <div class="w-full max-w-md bg-[#0b101d] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Google Gemini API Entegrasyonu
+          <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> LazalBot Çekirdek Ayarları
         </h3>
         <button id="closeAiSettingsBtn" class="text-slate-400 hover:text-slate-200">
           <i data-lucide="x" class="w-4 h-4"></i>
@@ -416,17 +416,15 @@
       </div>
 
       <p class="text-xs text-slate-300 leading-relaxed mb-4">
-        Canlı Google Gemini modelini kullanmak istersen API anahtarını girebilirsin. Anahtar tarayıcının yerel
-        hafızasında saklanır.
+        LazalBot varsayılan olarak entegre edilmiş güçlü fizik modelini kullanır. Kendi özel API anahtarınızı tanımlamak isterseniz buraya girebilirsiniz.
       </p>
 
       <div class="space-y-3">
-        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..."
+        <input type="password" id="geminiApiKeyInput" placeholder="Özel API Anahtarı (Opsiyonel)..."
           class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-purple-500">
 
         <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400">
-          <p>💡 Anahtar girmediğin takdirde <strong>Dahili Akıllı Fizik Sezgi Motoru</strong> çalışır; formülleri ve
-            boyut analizlerini eksiksiz açıklar.</p>
+          <p>💡 Anahtar girmediğin takdirde <strong>LazalBot Dahili Çekirdeği</strong> çalışır; formülleri ve derin fizik teorilerini eksiksiz tartışır.</p>
         </div>
       </div>
 
