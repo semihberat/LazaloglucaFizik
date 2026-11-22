@@ -236,7 +236,7 @@ class InteractivePhysicsCanvas {
           <i data-lucide="globe" class="w-3 h-3 text-cyan-400"></i>
           <span>Vikipedi</span>
         </button>
-        <button class="formula-pill-btn formula-ai-btn">
+        <button class="formula-pill-btn formula-ai-btn" title="LazalBot Fizik Sezgisi (Canlı AI)">
           <i data-lucide="sparkles" class="w-3 h-3 text-purple-400"></i>
           <span>Fizik Sezgisi</span>
         </button>

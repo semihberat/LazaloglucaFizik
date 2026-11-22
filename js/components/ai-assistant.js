@@ -150,33 +150,109 @@ class AIAssistant {
     }
   }
 
-  explainFormulaDeeply(formula) {
+  async explainFormulaDeeply(formula) {
+    const cardId = 'formula-deep-' + Date.now();
     const html = `
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">${formula.category}</span>
-        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">${formula.badge}</span>
-      </div>
-      <h3 class="text-sm font-bold text-white">${formula.title}</h3>
-      <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-serif text-emerald-300 text-center text-base formula-deep-display"></div>
-      <div>
-        <h4 class="text-[11px] font-bold text-slate-300 mb-0.5">🧠 Fiziksel Sezgi & Anlamı:</h4>
-        <p class="text-slate-300 leading-relaxed">${formula.intuition || formula.description}</p>
-      </div>
-      <div class="bg-slate-950 p-2 rounded border border-slate-800 text-[11px]">
-        <span class="text-slate-400 font-semibold">Boyut Analizi:</span>
-        <span class="font-mono text-cyan-400 ml-1">${formula.dimensional || 'Standart SI'}</span>
+      <div id="${cardId}" class="space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">${formula.category}</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">${formula.badge}</span>
+        </div>
+        <h3 class="text-sm font-bold text-white">${formula.title}</h3>
+        <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-serif text-emerald-300 text-center text-base formula-deep-display"></div>
+        <div class="bg-slate-950 p-2 rounded border border-slate-800 text-[11px] flex items-center justify-between">
+          <span class="text-slate-400 font-semibold">Boyut Analizi:</span>
+          <span class="font-mono text-cyan-400">${formula.dimensional || 'Standart SI'}</span>
+        </div>
+        
+        <div class="formula-ai-response-box bg-purple-950/20 border border-purple-500/30 rounded-xl p-3 text-xs space-y-2">
+          <div class="flex items-center gap-2 text-purple-300 font-semibold text-xs border-b border-purple-500/20 pb-1.5">
+            <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
+            <span>LazalBot Fizik Sezgisi & Derin Analiz</span>
+          </div>
+          <div class="formula-ai-content text-slate-300 leading-relaxed space-y-2">
+            <div class="flex items-center gap-2 text-purple-400 py-1">
+              <div class="w-3.5 h-3.5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+              <span>LazalBot teoriyi ve evrendeki derin anlamını inceliyor...</span>
+            </div>
+          </div>
+        </div>
       </div>
     `;
 
     this.appendCard('assistant', html);
 
-    const lastCard = this.feed.lastElementChild;
-    const formulaDiv = lastCard ? lastCard.querySelector('.formula-deep-display') : null;
-    if (formulaDiv) {
-      if (typeof window.renderMath === 'function') {
+    const cardEl = document.getElementById(cardId);
+    if (cardEl) {
+      const formulaDiv = cardEl.querySelector('.formula-deep-display');
+      if (formulaDiv && typeof window.renderMath === 'function') {
         window.renderMath(formulaDiv, formula.katex, true);
       }
+      if (window.lucide) {
+        lucide.createIcons({ root: cardEl });
+      }
     }
+
+    this.feed.scrollTop = this.feed.scrollHeight;
+
+    // AI Query specifically for this formula
+    const userPrompt = `Çalışma masasındaki "${formula.title}" ($${formula.katex}$) formülü için "Fizik Sezgisi" istendi. Bu formülün arkasındaki fiziksel sezgiyi ve evrendeki anlamını derinlemesine açıklar mısın?`;
+    
+    const unlockedQuantities = window.appState ? Array.from(window.appState.unlockedQuantities).join(', ') : 'Temel büyüklükler';
+    const systemPrompt = `Sen 'LazalBot' adında, 'lazaloglucafizik' platformunun baş kuramsal ve deneysel fizikçisisin. Richard Feynman ve Lev Landau tarzında; derin fiziksel sezgiye, matematiksel titizliğe sahip, aynı zamanda kullanıcıyla derin fiziksel ve felsefi tartışmalara girebilen gerçek bir yapay zekasın. Senin adın LazalBot.
+
+Kullanıcı az önce bir formülün "Fizik Sezgisi" butonuna tıkladı:
+- Formül: ${formula.title}
+- Bağıntı: $${formula.katex}$
+- Kategori: ${formula.category}
+- Boyut: ${formula.dimensional || 'Standart SI'}
+- Masada açık büyüklükler: ${unlockedQuantities}
+
+Görevin:
+1. Bu formülün doğada gerçekte neyi temsil ettiğini, günlük yaşam veya evrenden çarpıcı, zihin açıcı bir analojiyle anlat (Feynman tarzı).
+2. Değişkenlerin birbirini nasıl etkilediğini, aşırı sınırlarda (limit durumlar: hız ışık hızına yaklaşırsa, sıcaklık mutlak sıfıra inerse, kütle sonsuza giderse vb.) neler olduğunu açıkla.
+3. Formülü korunum yasaları (enerji, momentum, kütle vb.) veya simetrilerle ilişkilendir.
+4. Formül ve sembolleri KaTeX ($...$ ve $$...$$) formatında yaz.
+5. Samimi, heyecan verici, derin ve akıcı bir Türkçe kullan (2-3 kısa paragraf).`;
+
+    const payload = {
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
+    };
+
+    let replyText = await this.executeGeminiRequest(payload);
+
+    if (cardEl) {
+      const contentEl = cardEl.querySelector('.formula-ai-content');
+      if (contentEl) {
+        if (replyText) {
+          let formatted = replyText
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+
+          contentEl.innerHTML = `<div class="ai-text leading-relaxed text-slate-200">${formatted}</div>`;
+          this.renderLatexInContainer(contentEl);
+
+          // Add to chat history so user can follow up
+          this.chatHistory.push({ role: 'user', parts: [{ text: userPrompt }] });
+          this.chatHistory.push({ role: 'model', parts: [{ text: replyText }] });
+          if (this.chatHistory.length > 16) {
+            this.chatHistory = this.chatHistory.slice(-16);
+          }
+        } else {
+          // Fallback to offline pre-written intuition
+          contentEl.innerHTML = `
+            <p class="text-slate-300 leading-relaxed">${formula.intuition || formula.description}</p>
+          `;
+          this.renderLatexInContainer(contentEl);
+        }
+      }
+    }
+
+    this.feed.scrollTop = this.feed.scrollHeight;
   }
 
   generateHint() {
@@ -267,30 +343,7 @@ Görev ve Kuralların:
       contents: this.chatHistory
     };
 
-    const modelsToTry = [this.primaryModel, ...this.fallbackModels];
-    let replyText = null;
-
-    for (const model of modelsToTry) {
-      try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-            replyText = data.candidates[0].content.parts[0].text;
-            break;
-          }
-        }
-      } catch (err) {
-        console.warn(`Model ${model} request failed:`, err);
-      }
-    }
-
+    const replyText = await this.executeGeminiRequest(payload);
     document.getElementById(loadingId)?.remove();
 
     if (replyText) {
@@ -306,6 +359,30 @@ Görev ve Kuralların:
     } else {
       this.respondOffline(userText);
     }
+  }
+
+  async executeGeminiRequest(payload) {
+    const modelsToTry = [this.primaryModel, ...this.fallbackModels];
+    for (const model of modelsToTry) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+        }
+      } catch (err) {
+        console.warn(`Model ${model} request failed:`, err);
+      }
+    }
+    return null;
   }
 
   respondOffline(userText) {
